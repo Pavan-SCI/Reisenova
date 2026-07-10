@@ -32,13 +32,13 @@ const PlanTripPage = () => {
   };
 
   return (
-    <section ref={containerRef} className="min-h-screen pt-24 pb-24 md:pt-32 md:pb-32 bg-transparent text-sand dark:text-[#fdfbf7] relative overflow-hidden">
+    <section ref={containerRef} className="min-h-screen pt-24 pb-24 md:pt-32 md:pb-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden">
       <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1544079868-87422f281e05?q=80&w=2864&auto=format&fit=crop')] bg-cover bg-center pointer-events-none" />
       <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-t from-black dark:from-[#060a08] to-transparent pointer-events-none" />
       
       {/* Fixed Back Button */}
       <div className="fixed top-6 left-4 md:left-8 z-50 planner-reveal">
-        <Link to="/" className="inline-flex items-center gap-2 bg-[#fdfbf7]/80 dark:bg-black/60 backdrop-blur-md border border-forest/10 dark:border-[#fdfbf7]/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-[#fdfbf7] dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
+        <Link to="/" className="inline-flex items-center gap-2 bg-[#fdfbf7]/80 dark:bg-black/60 backdrop-blur-md border border-forest/10 dark:border-[#fdfbf7]/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-white dark:hover:text-white dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
           <ArrowLeft size={16} />
           <span>Back to Home</span>
         </Link>
@@ -48,11 +48,11 @@ const PlanTripPage = () => {
         
         <div className="mb-16 planner-reveal text-center">
           <p className="text-orange uppercase tracking-[0.4em] text-sm font-semibold mb-6">Let's Create Your Journey</p>
-          <h2 className="text-5xl md:text-7xl font-serif text-[#fdfbf7] mb-6 leading-tight drop-shadow-md">
+          <h2 className="text-5xl md:text-7xl font-serif text-forest dark:text-[#fdfbf7] mb-6 leading-tight drop-shadow-md">
             Start Planning <br />
             <span className="italic text-orange font-light">Your Trip</span>
           </h2>
-          <p className="text-[#fdfbf7]/70 font-light text-lg max-w-2xl mx-auto">
+          <p className="text-forest/70 dark:text-[#fdfbf7]/70 font-light text-lg max-w-2xl mx-auto">
             Tell us about your dream vacation and our local experts will craft a personalized itinerary just for you.
           </p>
         </div>
@@ -132,7 +132,7 @@ const PlanTripPage = () => {
                     <input type="checkbox" className="opacity-0 absolute inset-0 cursor-pointer peer" />
                     <div className="w-3 h-3 bg-orange rounded-sm scale-0 peer-checked:scale-100 transition-transform duration-200" />
                   </div>
-                  <span className="text-[#fdfbf7]/80 group-hover:text-[#fdfbf7] text-sm font-medium transition-colors">{interest}</span>
+                  <span className="text-[#fdfbf7]/80 group-hover:text-orange text-sm font-medium transition-colors">{interest}</span>
                 </label>
               ))}
             </div>
@@ -144,7 +144,7 @@ const PlanTripPage = () => {
           </div>
 
           <div className="text-center mt-12">
-            <button type="submit" className="bg-orange text-[#fdfbf7] px-12 py-5 rounded-full font-bold uppercase tracking-widest hover:bg-[#fdfbf7] hover:text-forest dark:text-[#fdfbf7] dark:hover:bg-[#16201a] dark:hover:text-[#fdfbf7] transition-colors duration-300 shadow-xl hover:shadow-[0_10px_30px_-10px_rgba(242,101,34,0.5)] cursor-pointer text-sm md:text-base">
+            <button type="submit" className="bg-orange text-white px-12 py-5 rounded-full font-bold uppercase tracking-widest hover:bg-forest dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-colors duration-300 shadow-xl hover:shadow-[0_10px_30px_-10px_rgba(242,101,34,0.5)] cursor-pointer text-sm md:text-base">
               Submit Trip Request
             </button>
             <p className="text-[#fdfbf7]/50 text-xs mt-6 uppercase tracking-widest font-semibold">We will respond within 24 hours</p>

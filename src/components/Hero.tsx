@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
-import { Compass, Palmtree, Sun, Menu, X } from 'lucide-react';
+import { Compass, Palmtree, Sun, Menu, X, User } from 'lucide-react';
 import DarkModeToggle from './DarkModeToggle';
 
 const Hero = () => {
@@ -99,6 +99,12 @@ const Hero = () => {
 
           <div className="flex items-center gap-2 md:gap-4">
             <DarkModeToggle />
+            <Link to="/login" className="hidden md:flex items-center gap-2 text-[#fdfbf7] hover:text-orange transition-colors">
+              <span className="text-sm uppercase tracking-wider font-semibold">Log In</span>
+            </Link>
+            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-[#fdfbf7]/20 text-[#fdfbf7] hover:border-orange hover:text-orange transition-colors">
+              <User size={18} />
+            </Link>
             <Link to="/plan-trip" className="hidden md:flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-forest hover:text-[#fdfbf7] dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-all shadow-lg hover:shadow-orange/30 group">
               <span className="text-sm uppercase tracking-wider font-semibold group-hover:translate-x-1 transition-transform">Book Now</span>
             </Link>
@@ -118,11 +124,13 @@ const Hero = () => {
           <div className="absolute top-20 left-0 w-full bg-white/95 dark:bg-[#0a0f0d]/95 backdrop-blur-xl border-b border-forest/10 dark:border-white/10 z-40 lg:hidden shadow-xl">
             <nav className="flex flex-col p-6 gap-6 text-forest dark:text-[#fdfbf7] text-sm tracking-widest uppercase font-semibold">
               <a href="#about" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">About</a>
-              <Link to="/destinations" className="hover:text-orange transition-colors">Destinations</Link>
-              <Link to="/packages" className="hover:text-orange transition-colors">Packages</Link>
-              <Link to="/hotels" className="hover:text-orange transition-colors">Hotels</Link>
-              <Link to="/plan-trip" className="hover:text-orange transition-colors">Plan Trip</Link>
-              <Link to="/plan-trip" className="mt-4 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-forest dark:hover:bg-[#16201a] dark:hover:text-[#fdfbf7] transition-all text-center">
+              <Link to="/destinations" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Destinations</Link>
+              <Link to="/packages" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Packages</Link>
+              <Link to="/hotels" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Hotels</Link>
+              <Link to="/plan-trip" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Plan Trip</Link>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Log In</Link>
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors flex items-center gap-2"><User size={16} /> Profile</Link>
+              <Link to="/plan-trip" onClick={() => setMobileMenuOpen(false)} className="mt-4 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-forest dark:hover:bg-[#16201a] dark:hover:text-[#fdfbf7] transition-all text-center">
                 Book Now
               </Link>
             </nav>

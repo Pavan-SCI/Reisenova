@@ -6,6 +6,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CustomCursor from './components/CustomCursor';
 import Home from './pages/Home';
 import PlanTripPage from './pages/PlanTripPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
 import JungleBackground from './components/JungleBackground';
 import PackagesPage from './pages/PackagesPage';
 import PackageDetailsPage from './pages/PackageDetailsPage';
@@ -76,6 +79,9 @@ export default function App() {
         <CustomCursor />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/plan-trip" element={<PlanTripPage />} />
           <Route path="/packages" element={<PackagesPage />} />
           <Route path="/packages/:id" element={<PackageDetailsPage />} />
