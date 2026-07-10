@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --theme-sand: #fdfbf7;
+  --theme-forest: #16201a;
+  --theme-white: #ffffff;
+}
+
+.dark {
+  --theme-sand: #121915;
+  --theme-forest: #fdfbf7;
+  --theme-white: #0a0f0d;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  
+  --color-sand: var(--theme-sand);
+  --color-forest: var(--theme-forest);
+  --color-white: var(--theme-white);
+  --color-ocean: #1a4a5a;
+  --color-gold: #c29545;
+  --color-orange: #f26522;
+}
+
+@layer base {
+  body {
+    @apply bg-sand text-forest font-sans antialiased selection:bg-orange selection:text-white cursor-none transition-colors duration-500;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+/* Custom Cursor Styles */
+.custom-cursor {
+  @apply fixed top-0 left-0 w-3 h-3 bg-orange rounded-full pointer-events-none z-[100] flex items-center justify-center;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor-follower {
+  @apply fixed top-0 left-0 w-10 h-10 border border-forest/30 rounded-full pointer-events-none z-[99];
+  transform: translate(-50%, -50%);
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}html { scroll-behavior: smooth; }
