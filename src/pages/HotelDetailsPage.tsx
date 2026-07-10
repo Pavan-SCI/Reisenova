@@ -181,7 +181,7 @@ const HotelDetailsPage = () => {
               <h3 className="text-2xl font-serif mb-6">Signature Highlights</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {hotel.highlights.map((highlight, i) => (
-                  <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10">
+                  <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10">
                     <CheckCircle className="text-orange shrink-0 mt-0.5" size={20} />
                     <span className="text-forest/90 dark:text-[#fdfbf7]/90 font-medium">{highlight}</span>
                   </div>
@@ -204,7 +204,7 @@ const HotelDetailsPage = () => {
           </div>
           
           <div className="space-y-8">
-            <div className="bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl hotel-details-reveal sticky top-32">
+            <div className="bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl hotel-details-reveal sticky top-32">
               <div className="mb-6 pb-6 border-b border-forest/10 dark:border-white/10 text-center">
                 <span className="block text-xs uppercase tracking-widest text-forest/50 dark:text-[#fdfbf7]/50 font-bold mb-2">Starting From</span>
                 <span className="text-4xl font-serif text-orange">{hotel.price}</span>

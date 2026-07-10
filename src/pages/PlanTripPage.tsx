@@ -37,7 +37,7 @@ const PlanTripPage = () => {
       <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-t from-black dark:from-[#060a08] to-transparent pointer-events-none" />
       
       {/* Fixed Back Button */}
-      <div className="fixed top-6 left-4 md:left-8 z-50 planner-reveal">
+      <div className="fixed top-6 left-4 md:left-8 z-50">
         <Link to="/" className="inline-flex items-center gap-2 bg-[#fdfbf7]/80 dark:bg-black/60 backdrop-blur-md border border-forest/10 dark:border-[#fdfbf7]/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-white dark:hover:text-white dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
           <ArrowLeft size={16} />
           <span>Back to Home</span>
@@ -57,7 +57,7 @@ const PlanTripPage = () => {
           </p>
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="bg-[#fdfbf7]/5 dark:bg-[#0a0f0d]/30 backdrop-blur-xl border border-[#fdfbf7]/10 p-8 md:p-12 lg:p-16 rounded-3xl shadow-2xl planner-reveal text-left transform-style-3d text-[#fdfbf7] max-w-5xl mx-auto">
+        <form ref={formRef} onSubmit={handleSubmit} className="bg-black/60 dark:bg-[#0a0f0d]/30 backdrop-blur-xl border border-white/10 dark:border-[#fdfbf7]/10 p-8 md:p-12 lg:p-16 rounded-3xl shadow-2xl planner-reveal text-left transform-style-3d text-[#fdfbf7] max-w-5xl mx-auto">
           
           <h3 className="text-2xl font-serif text-[#fdfbf7] mb-8 border-b border-[#fdfbf7]/20 pb-4">1. Personal Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">

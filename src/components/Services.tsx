@@ -63,7 +63,7 @@ const Services = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, idx) => (
-            <div key={idx} className="service-card bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 p-10 rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-500 border border-[#fdfbf7]/5 flex flex-col items-center text-center group">
+            <div key={idx} className="service-card bg-white/80 dark:bg-[#0a0f0d]/40 backdrop-blur-xl border border-white/50 dark:border-white/10 p-10 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col items-center text-center group">
               <div className="text-orange mb-8 transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300">
                 {service.icon}
               </div>

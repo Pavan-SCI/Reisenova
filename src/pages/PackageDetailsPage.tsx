@@ -199,7 +199,7 @@ const PackageDetailsPage = () => {
               <div className="flex flex-wrap gap-3">
                 {pkg.destinations.map((dest, i) => (
                   <React.Fragment key={i}>
-                    <span className="bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md px-4 py-2 rounded-full border border-forest/10 dark:border-white/10 font-medium">
+                    <span className="bg-white dark:bg-[#0a0f0d] px-4 py-2 rounded-full border border-forest/10 dark:border-white/10 font-medium">
                       {dest}
                     </span>
                     {i < pkg.destinations.length - 1 && (
@@ -226,7 +226,7 @@ const PackageDetailsPage = () => {
           </div>
           
           <div className="space-y-8">
-            <div className="bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl pkg-details-reveal sticky top-32">
+            <div className="bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl pkg-details-reveal sticky top-32">
               <div className="mb-6 pb-6 border-b border-forest/10 dark:border-white/10">
                 <span className="block text-xs uppercase tracking-widest text-forest/50 dark:text-[#fdfbf7]/50 font-bold mb-2">Starting Price</span>
                 <span className="text-4xl font-serif text-orange">{pkg.price}</span>

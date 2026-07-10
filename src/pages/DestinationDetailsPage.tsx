@@ -106,7 +106,7 @@ const DestinationDetailsPage = () => {
           </div>
           
           <div className="space-y-8">
-            <div className="bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl dest-details-reveal">
+            <div className="bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10 rounded-2xl p-8 shadow-xl dest-details-reveal">
               <h3 className="text-xl font-serif mb-6 border-b border-forest/10 dark:border-white/10 pb-4">Key Information</h3>
               
               <ul className="space-y-6">

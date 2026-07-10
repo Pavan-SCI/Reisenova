@@ -32,9 +32,9 @@ const HotelsPage = () => {
       
       gsap.utils.toArray('.hotel-card-page').forEach((card: any) => {
         gsap.fromTo(card, 
-          { y: 100, opacity: 0, rotateX: 10 },
+          { y: 100, opacity: 0, },
           {
-            y: 0, opacity: 1, rotateX: 0,
+            y: 0, opacity: 1, 
             duration: 0.8,
             ease: 'power3.out',
             scrollTrigger: {
@@ -49,7 +49,7 @@ const HotelsPage = () => {
     return () => ctx.revert();
   }, []);
 
-  return (
+  return (<>
     <section ref={containerRef} className="min-h-screen pt-24 pb-24 md:pt-32 md:pb-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden transition-colors duration-500">
       {/* Background subtle image */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -57,8 +57,8 @@ const HotelsPage = () => {
       </div>
       
       {/* Fixed Back Button */}
-      <div className="fixed top-6 left-4 md:left-8 z-50 hotel-reveal">
-        <Link to="/" className="inline-flex items-center gap-2 bg-white/80 dark:bg-black/60 backdrop-blur-md border border-forest/10 dark:border-white/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-[#fdfbf7] dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
+      <div className="fixed top-6 left-4 md:left-8 z-50">
+        <Link to="/" className="inline-flex items-center gap-2 bg-white/80 dark:bg-black/60 border border-forest/10 dark:border-white/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-[#fdfbf7] dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
           <ArrowLeft size={16} />
           <span>Back to Home</span>
         </Link>
@@ -81,17 +81,17 @@ const HotelsPage = () => {
             <div 
               key={idx} 
               onClick={() => navigate(`/hotels/${hotel.name.toLowerCase().replace(/ /g, '-')}`)}
-              className="hotel-card-page group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 transform-style-3d bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10"
+              className="hotel-card-page group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500  bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10"
             >
               <img src={hotel.img} alt={hotel.name} className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform duration-1000 ease-out" />
               
-              <div className="absolute top-4 right-4 bg-white/90 dark:bg-[#0a0f0d]/90 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] z-20">
+              <div className="absolute top-4 right-4 bg-white/90 dark:bg-[#0a0f0d]/90 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] z-20">
                 {hotel.type}
               </div>
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
               
-              <div className="absolute bottom-0 left-0 w-full p-8 backdrop-blur-md bg-white/5 border-t border-white/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 transform-style-3d">
+              <div className="absolute bottom-0 left-0 w-full p-8 bg-white/5 border-t border-white/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ">
                 <div className="flex gap-1 mb-3 text-orange drop-shadow-sm">
                   {[...Array(hotel.rating)].map((_, i) => (
                     <Star key={i} size={14} fill="currentColor" />
@@ -112,7 +112,7 @@ const HotelsPage = () => {
         </div>
 
       </div>
-    </section>
+    </section></>
   );
 };
 

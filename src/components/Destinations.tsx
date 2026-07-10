@@ -54,58 +54,9 @@ const Destinations = () => {
     return () => ctx.revert();
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
-    const card = cardsRef.current[idx];
-    if (!card) return;
-    
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    const rotateX = ((y - centerY) / centerY) * -15;
-    const rotateY = ((x - centerX) / centerX) * 15;
-    
-    gsap.to(card, {
-      rotateX,
-      rotateY,
-      transformPerspective: 1200,
-      ease: 'power2.out',
-      duration: 0.5,
-    });
-    
-    const img = card.querySelector('img');
-    gsap.to(img, {
-      x: ((x - centerX) / centerX) * -15,
-      y: ((y - centerY) / centerY) * -15,
-      scale: 1.15,
-      duration: 0.5,
-      ease: 'power2.out',
-    });
-  };
 
-  const handleMouseLeave = (idx: number) => {
-    const card = cardsRef.current[idx];
-    if (!card) return;
-    
-    gsap.to(card, {
-      rotateX: 0,
-      rotateY: 0,
-      ease: 'elastic.out(1, 0.5)',
-      duration: 1.5,
-    });
-    
-    const img = card.querySelector('img');
-    gsap.to(img, {
-      x: 0,
-      y: 0, opacity: 1,
-      scale: 1,
-      duration: 1.5,
-      ease: 'power3.out',
-    });
-  };
+
+
 
   return (
     <section id="destinations" ref={containerRef} className="py-32 bg-transparent text-forest dark:text-[#fdfbf7] perspective-[2000px] transition-colors duration-500">
@@ -127,10 +78,10 @@ const Destinations = () => {
             <div 
               key={dest.name}
               ref={el => cardsRef.current[index] = el}
-              onMouseMove={(e) => handleMouseMove(e, index)}
-              onMouseLeave={() => handleMouseLeave(index)}
+              
+              
               onClick={() => navigate(`/destinations/${dest.name.toLowerCase()}`)}
-              className="group relative h-[550px] overflow-hidden rounded-2xl cursor-pointer will-change-transform transform-style-3d shadow-xl hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] transition-shadow duration-500 bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10"
+              className="group relative h-[550px] overflow-hidden rounded-2xl cursor-pointer will-change-transform  shadow-xl hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] transition-shadow duration-500 bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
               <img 
@@ -138,9 +89,9 @@ const Destinations = () => {
                 alt={dest.name} 
                 className="w-[110%] h-[110%] -left-[5%] -top-[5%] absolute object-cover will-change-transform pointer-events-none"
               />
-              <div className="absolute bottom-0 left-0 p-8 z-20 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 transform-style-3d" style={{ transform: 'translateZ(50px)' }}>
-                <h3 className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg" style={{ transform: 'translateZ(20px)' }}>{dest.name}</h3>
-                <p className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100" style={{ transform: 'translateZ(30px)' }}>{dest.desc}</p>
+              <div className="absolute bottom-0 left-0 p-8 z-20 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 ">
+                <h3 className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg">{dest.name}</h3>
+                <p className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{dest.desc}</p>
               </div>
             </div>
           ))}

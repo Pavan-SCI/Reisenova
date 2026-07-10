@@ -91,16 +91,16 @@ const PackagesPage = () => {
     return () => ctx.revert();
   }, []);
 
-  return (
-    <section ref={containerRef} className="min-h-screen pt-24 pb-24 md:pt-32 md:pb-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden transition-colors duration-500">
-      
+  return (<>
+    
       {/* Fixed Back Button */}
-      <div className="fixed top-6 left-4 md:left-8 z-50 pkg-reveal">
+      <div className="fixed top-6 left-4 md:left-8 z-50">
         <Link to="/" className="inline-flex items-center gap-2 bg-white/80 dark:bg-black/60 backdrop-blur-md border border-forest/10 dark:border-white/10 text-forest dark:text-[#fdfbf7] hover:bg-orange hover:text-[#fdfbf7] dark:hover:bg-orange transition-all uppercase tracking-widest text-[10px] md:text-xs font-bold px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-lg">
           <ArrowLeft size={16} />
           <span>Back to Home</span>
         </Link>
       </div>
+<section ref={containerRef} className="min-h-screen pt-24 pb-24 md:pt-32 md:pb-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden transition-colors duration-500">
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
         
@@ -120,7 +120,7 @@ const PackagesPage = () => {
             <div 
               key={idx} 
               onClick={() => navigate(`/packages/${pkg.title.toLowerCase().replace(/ & /g, '-and-').replace(/ /g, '-')}`)}
-              className="pkg-card group bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col transform-style-3d cursor-pointer"
+              className="pkg-card group bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col cursor-pointer"
             >
               <div className="h-64 overflow-hidden relative">
                 <img src={pkg.img} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -159,7 +159,7 @@ const PackagesPage = () => {
         </div>
 
       </div>
-    </section>
+    </section></>
   );
 };
 

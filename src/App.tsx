@@ -48,23 +48,19 @@ export default function App() {
       wheelMultiplier: 1,
       touchMultiplier: 2,
     });
-    
+
     // @ts-ignore
     window.lenis = lenis;
-    
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    
+
     // Integrate Lenis with ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
+
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
     });
+
     gsap.ticker.lagSmoothing(0, 0);
-    
+
     return () => {
       lenis.destroy();
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
