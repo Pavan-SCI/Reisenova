@@ -8,6 +8,7 @@ const Hero = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const parallaxRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -19,6 +20,7 @@ const Hero = () => {
         scale: 2,
         z: 800,
         ease: 'none',
+        overwrite: 'auto',
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
@@ -42,21 +44,29 @@ const Hero = () => {
     }, containerRef);
 
     // Mouse Parallax for 3D effect
+    const parallax = gsap.to(parallaxRef.current, {
+      rotateX: 0,
+      rotateY: 0,
+      x: 0,
+      y: 0,
+      duration: 1.2,
+      ease: 'power2.out',
+      transformPerspective: 1200,
+      paused: true,
+      overwrite: 'auto',
+    });
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const { clientX, clientY } = e;
       const x = (clientX / window.innerWidth - 0.5) * 2;
       const y = (clientY / window.innerHeight - 0.5) * 2;
 
-      gsap.to(textRef.current, {
-        rotateX: y * -10,
-        rotateY: x * 10,
-        x: x * 40,
-        y: y * 40,
-        duration: 1.2,
-        ease: 'power2.out',
-        transformPerspective: 1200,
-      });
+      parallax.vars.rotateX = y * -10;
+      parallax.vars.rotateY = x * 10;
+      parallax.vars.x = x * 40;
+      parallax.vars.y = y * 40;
+      parallax.invalidate().restart();
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -168,8 +178,9 @@ const Hero = () => {
         )}
 
         {/* Main Content */}
-        <div ref={textRef} className="relative z-20 text-center px-4 flex flex-col items-center will-change-transform transform-style-3d pt-40 mt-12 md:mt-16 lg:mt-8 md:pt-32 pointer-events-none">
-          <div className="overflow-hidden mb-6" style={{ transform: 'translateZ(80px)' }}>
+        <div ref={parallaxRef} className="relative z-20 text-center px-4 flex flex-col items-center will-change-transform transform-style-3d pt-40 mt-12 md:mt-16 lg:mt-8 md:pt-32 pointer-events-none">
+          <div ref={textRef} className="flex flex-col items-center transform-style-3d w-full">
+            <div className="overflow-hidden mb-6" style={{ transform: 'translateZ(80px)' }}>
             <p className="reveal-text text-forest/90 dark:text-[#fdfbf7]/90 text-sm md:text-base uppercase tracking-[0.4em] font-bold block bg-white/40 dark:bg-[#0a0f0d]/40 border border-forest/10 dark:border-white/10 px-6 py-2 rounded-full backdrop-blur-md inline-block shadow-sm transition-colors duration-500">
               Your Ultimate Travel Partner
             </p>
@@ -187,6 +198,7 @@ const Hero = () => {
             <a href="#about" className="group flex items-center justify-center w-20 h-20 rounded-full border border-orange/40 backdrop-blur-md hover:bg-orange hover:text-[#fdfbf7] transition-all duration-700 text-orange transform hover:scale-110 shadow-xl bg-white/50 dark:bg-[#0a0f0d]/50">
               <Compass size={32} className="group-hover:rotate-90 transition-transform duration-700" />
             </a>
+          </div>
           </div>
         </div>
         
