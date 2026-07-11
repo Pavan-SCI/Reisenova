@@ -25,10 +25,36 @@ const PlanTripPage = () => {
     return () => ctx.revert();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Thank you for your detailed inquiry! Our travel experts will craft your perfect itinerary and contact you soon.");
-    if(formRef.current) formRef.current.reset();
+    if (!formRef.current) return;
+
+    const formData = new FormData(formRef.current);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Get all checked interests
+    const interests = formData.getAll('interests');
+    data.interests = interests as any;
+
+    try {
+      const response = await fetch('http://localhost:5001/api/trips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        alert("Thank you for your detailed inquiry! Our travel experts will craft your perfect itinerary and contact you soon.");
+        formRef.current.reset();
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert("Failed to connect to the server. Is the backend running?");
+    }
   };
 
   return (
@@ -63,19 +89,19 @@ const PlanTripPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Full Name *</label>
-              <input type="text" required className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="John Doe" />
+              <input type="text" name="fullName" required className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="John Doe" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Email Address *</label>
-              <input type="email" required className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="john@example.com" />
+              <input type="email" name="email" required className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="john@example.com" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">WhatsApp / Phone</label>
-              <input type="tel" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="+1 234 567 8900" />
+              <input type="tel" name="phone" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="+1 234 567 8900" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Country of Residence</label>
-              <input type="text" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="United Kingdom" />
+              <input type="text" name="country" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="United Kingdom" />
             </div>
           </div>
 
@@ -83,19 +109,19 @@ const PlanTripPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Estimated Arrival</label>
-              <input type="date" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" />
+              <input type="date" name="arrivalDate" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Duration (Days)</label>
-              <input type="number" min="1" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="e.g., 10" />
+              <input type="number" name="duration" min="1" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="e.g., 10" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Adults</label>
-              <input type="number" min="1" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="2" />
+              <input type="number" name="adults" min="1" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="2" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Children (Under 12)</label>
-              <input type="number" min="0" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="0" />
+              <input type="number" name="children" min="0" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30" placeholder="0" />
             </div>
           </div>
 
@@ -103,7 +129,7 @@ const PlanTripPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Accommodation Standard</label>
-              <select className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] appearance-none cursor-pointer">
+              <select name="accommodation" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] appearance-none cursor-pointer">
                 <option value="" className="text-forest dark:text-[#fdfbf7]">Select Standard</option>
                 <option value="luxury" className="text-forest dark:text-[#fdfbf7]">Luxury (5-Star & Boutique)</option>
                 <option value="premium" className="text-forest dark:text-[#fdfbf7]">Premium (4-Star)</option>
@@ -113,7 +139,7 @@ const PlanTripPage = () => {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Estimated Budget (Per Person)</label>
-              <select className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] appearance-none cursor-pointer">
+              <select name="budget" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] appearance-none cursor-pointer">
                 <option value="" className="text-forest dark:text-[#fdfbf7]">Select Budget</option>
                 <option value="standard" className="text-forest dark:text-[#fdfbf7]">$500 - $1,000</option>
                 <option value="premium" className="text-forest dark:text-[#fdfbf7]">$1,000 - $2,500</option>
@@ -129,7 +155,7 @@ const PlanTripPage = () => {
               {['Wildlife & Safari', 'Culture & Heritage', 'Beaches & Relaxation', 'Adventure & Hiking', 'Wellness & Ayurveda', 'Culinary Experiences', 'Romantic / Honeymoon', 'Family Friendly'].map((interest) => (
                 <label key={interest} className="flex items-center gap-3 cursor-pointer group">
                   <div className="w-5 h-5 border border-[#fdfbf7]/40 rounded flex items-center justify-center group-hover:border-orange transition-colors relative">
-                    <input type="checkbox" className="opacity-0 absolute inset-0 cursor-pointer peer" />
+                    <input type="checkbox" name="interests" value={interest} className="opacity-0 absolute inset-0 cursor-pointer peer" />
                     <div className="w-3 h-3 bg-orange rounded-sm scale-0 peer-checked:scale-100 transition-transform duration-200" />
                   </div>
                   <span className="text-[#fdfbf7]/80 group-hover:text-orange text-sm font-medium transition-colors">{interest}</span>
@@ -140,7 +166,7 @@ const PlanTripPage = () => {
 
           <div className="flex flex-col gap-2 mb-10">
             <label className="text-sm font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Additional Information</label>
-            <textarea className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30 resize-none h-32" placeholder="Tell us more about your perfect trip, specific places you want to visit, dietary requirements, or any special occasions..."></textarea>
+            <textarea name="additionalInfo" className="bg-transparent border-b border-[#fdfbf7]/20 p-3 outline-none focus:border-orange transition-colors duration-300 text-[#fdfbf7] placeholder:text-[#fdfbf7]/30 resize-none h-32" placeholder="Tell us more about your perfect trip, specific places you want to visit, dietary requirements, or any special occasions..."></textarea>
           </div>
 
           <div className="text-center mt-12">
