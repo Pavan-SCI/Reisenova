@@ -1,17 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 @import "tailwindcss";
+
+@property --theme-sand {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fdfbf7;
+}
+
+@property --theme-forest {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #16201a;
+}
+
+@property --theme-white {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --theme-sand: #fdfbf7;
   --theme-forest: #16201a;
   --theme-white: #ffffff;
+  transition: --theme-sand 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --theme-forest 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --theme-white 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark {
   --theme-sand: #121915;
   --theme-forest: #fdfbf7;
   --theme-white: #0a0f0d;
+  transition: --theme-sand 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --theme-forest 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              --theme-white 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @theme {

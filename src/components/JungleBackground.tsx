@@ -167,7 +167,7 @@ const JungleBackground = () => {
     <div ref={containerRef} className="fixed inset-0 w-full h-full pointer-events-none z-0 perspective-[2000px] overflow-hidden bg-[#e8e4db] dark:bg-[#0a0f0d] transition-colors duration-500">
       {/* Background Image */}
       <div className="absolute inset-0 w-[120%] h-[120%] -left-[10%] -top-[10%] z-0">
-        <div className="absolute inset-0 bg-sand/80 dark:bg-[#0a0f0d]/70 z-10 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-sand/80 dark:bg-white/70 z-10 transition-colors duration-500" />
         <img
           ref={bgRef}
           src="https://images.unsplash.com/photo-1518182170546-076616fdacaf?q=80&w=2940&auto=format&fit=crop"

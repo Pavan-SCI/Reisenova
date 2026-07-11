@@ -15,7 +15,6 @@ const Hero = () => {
       // Text flies over your head
       gsap.to(textRef.current, {
         y: -500,
-        
         rotateX: 60,
         scale: 2,
         z: 800,
@@ -44,29 +43,22 @@ const Hero = () => {
     }, containerRef);
 
     // Mouse Parallax for 3D effect
-    const parallax = gsap.to(parallaxRef.current, {
-      rotateX: 0,
-      rotateY: 0,
-      x: 0,
-      y: 0,
-      duration: 1.2,
-      ease: 'power2.out',
-      transformPerspective: 1200,
-      paused: true,
-      overwrite: 'auto',
-    });
-
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !parallaxRef.current) return;
       const { clientX, clientY } = e;
       const x = (clientX / window.innerWidth - 0.5) * 2;
       const y = (clientY / window.innerHeight - 0.5) * 2;
 
-      parallax.vars.rotateX = y * -10;
-      parallax.vars.rotateY = x * 10;
-      parallax.vars.x = x * 40;
-      parallax.vars.y = y * 40;
-      parallax.invalidate().restart();
+      gsap.to(parallaxRef.current, {
+        rotateX: y * -10,
+        rotateY: x * 10,
+        x: x * 40,
+        y: y * 40,
+        duration: 1.2,
+        ease: 'power2.out',
+        transformPerspective: 1200,
+        overwrite: 'auto',
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -78,38 +70,40 @@ const Hero = () => {
 
   return (
     <section ref={containerRef} className="relative h-screen w-full bg-transparent perspective-[2000px]">
-      
       <div className="h-screen w-full flex items-center justify-center transform-style-3d">
         {/* Header / Nav */}
         <header className="absolute top-0 left-0 w-full z-50 pt-6 pb-12 px-8 flex justify-between items-center reveal-ui">
-          <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)] pointer-events-none -z-10">
-            {/* Light mode background with horizontal mask for logo and right side */}
+          <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)] backdrop-blur-xl transition-all duration-500 pointer-events-none -z-10">
+            {/* Light mode color overlays (smooth transition) */}
+            <div className="absolute inset-0 transition-opacity duration-500 opacity-100 dark:opacity-0">
+              {/* Light mode background with horizontal mask for logo and right side */}
+              <div 
+                className="absolute inset-0 bg-white/30"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))',
+                  maskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))'
+                }}
+              />
+              {/* Dark blur specifically behind the logo in light mode */}
+              <div 
+                className="absolute inset-0 bg-black/40"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)',
+                  maskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)'
+                }}
+              />
+              {/* Dark blur specifically behind the right side in light mode */}
+              <div 
+                className="absolute inset-0 bg-black/40"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)',
+                  maskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)'
+                }}
+              />
+            </div>
+            {/* Dark mode background without horizontal mask (smooth transition) */}
             <div 
-              className="absolute inset-0 bg-white/30 backdrop-blur-2xl dark:hidden"
-              style={{
-                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))',
-                maskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))'
-              }}
-            />
-            {/* Dark blur specifically behind the logo in light mode */}
-            <div 
-              className="absolute inset-0 bg-black/40 backdrop-blur-md dark:hidden"
-              style={{
-                WebkitMaskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)',
-                maskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)'
-              }}
-            />
-            {/* Dark blur specifically behind the right side in light mode */}
-            <div 
-              className="absolute inset-0 bg-black/40 backdrop-blur-md dark:hidden"
-              style={{
-                WebkitMaskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)',
-                maskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)'
-              }}
-            />
-            {/* Dark mode background without horizontal mask */}
-            <div 
-              className="absolute inset-0 hidden dark:block bg-[#0a0f0d]/80 backdrop-blur-3xl"
+              className="absolute inset-0 bg-[#0a0f0d]/80 transition-opacity duration-500 opacity-0 dark:opacity-100"
             />
           </div>
           {/* Styled Reisenova Logo */}
@@ -139,19 +133,19 @@ const Hero = () => {
 
           <div className="flex items-center gap-2 md:gap-4 -mt-6">
             <DarkModeToggle />
-            <Link to="/login" className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange transition-colors">
+            <Link to="/login" className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange transition-colors duration-500">
               <span className="text-sm uppercase tracking-wider font-semibold">Log In</span>
             </Link>
-            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/20 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-colors">
+            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/20 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-colors duration-500">
               <User size={18} />
             </Link>
-            <Link to="/plan-trip" className="hidden md:flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-white hover:text-forest dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-all shadow-lg hover:shadow-orange/30 group">
+            <Link to="/plan-trip" className="hidden md:flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-white hover:text-forest dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-all duration-500 shadow-lg hover:shadow-orange/30 group">
               <span className="text-sm uppercase tracking-wider font-semibold group-hover:translate-x-1 transition-transform">Book Now</span>
             </Link>
             
             {/* Mobile Menu Toggle */}
             <button 
-              className="lg:hidden p-2 text-white dark:text-[#fdfbf7]"
+              className="lg:hidden p-2 text-white dark:text-[#fdfbf7] transition-colors duration-500"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -181,24 +175,24 @@ const Hero = () => {
         <div ref={parallaxRef} className="relative z-20 text-center px-4 flex flex-col items-center will-change-transform transform-style-3d pt-40 mt-12 md:mt-16 lg:mt-8 md:pt-32 pointer-events-none">
           <div ref={textRef} className="flex flex-col items-center transform-style-3d w-full">
             <div className="overflow-hidden mb-6" style={{ transform: 'translateZ(80px)' }}>
-            <p className="reveal-text text-forest/90 dark:text-[#fdfbf7]/90 text-sm md:text-base uppercase tracking-[0.4em] font-bold block bg-white/40 dark:bg-[#0a0f0d]/40 border border-forest/10 dark:border-white/10 px-6 py-2 rounded-full backdrop-blur-md inline-block shadow-sm transition-colors duration-500">
-              Your Ultimate Travel Partner
-            </p>
-          </div>
-          <div className="overflow-hidden perspective-[1200px]" style={{ transform: 'translateZ(120px)' }}>
-            <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-6xl md:text-[8rem] lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
-              Explore <br />
-              <span className="italic font-medium text-orange tracking-normal pr-8 drop-shadow-md">Wild</span>
-              <br />
-              <span className="text-5xl md:text-7xl lg:text-8xl mt-4 block text-forest/90 dark:text-[#fdfbf7]/90 transition-colors duration-500">Sri Lanka</span>
-            </h1>
-          </div>
-          
-          <div className="mt-20 reveal-ui pointer-events-auto" style={{ transform: 'translateZ(50px)' }}>
-            <a href="#about" className="group flex items-center justify-center w-20 h-20 rounded-full border border-orange/40 backdrop-blur-md hover:bg-orange hover:text-[#fdfbf7] transition-all duration-700 text-orange transform hover:scale-110 shadow-xl bg-white/50 dark:bg-[#0a0f0d]/50">
-              <Compass size={32} className="group-hover:rotate-90 transition-transform duration-700" />
-            </a>
-          </div>
+              <p className="reveal-text text-forest/90 dark:text-[#fdfbf7]/90 text-sm md:text-base uppercase tracking-[0.4em] font-bold block bg-white/40 dark:bg-[#0a0f0d]/40 border border-forest/10 dark:border-white/10 px-6 py-2 rounded-full backdrop-blur-md inline-block shadow-sm transition-colors duration-500">
+                Your Ultimate Travel Partner
+              </p>
+            </div>
+            <div className="overflow-hidden perspective-[1200px]" style={{ transform: 'translateZ(120px)' }}>
+              <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-6xl md:text-[8rem] lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
+                Explore <br />
+                <span className="italic font-medium text-orange tracking-normal pr-8 drop-shadow-md">Wild</span>
+                <br />
+                <span className="text-5xl md:text-7xl lg:text-8xl mt-4 block text-forest/90 dark:text-[#fdfbf7]/90 transition-colors duration-500">Sri Lanka</span>
+              </h1>
+            </div>
+            
+            <div className="mt-20 reveal-ui pointer-events-auto" style={{ transform: 'translateZ(50px)' }}>
+              <a href="#about" className="group flex items-center justify-center w-20 h-20 rounded-full border border-orange/40 backdrop-blur-md hover:bg-orange hover:text-[#fdfbf7] transition-all duration-700 text-orange transform hover:scale-110 shadow-xl bg-white/50 dark:bg-[#0a0f0d]/50">
+                <Compass size={32} className="group-hover:rotate-90 transition-transform duration-700" />
+              </a>
+            </div>
           </div>
         </div>
         
