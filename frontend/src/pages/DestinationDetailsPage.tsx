@@ -72,7 +72,6 @@ const DestinationDetailsPage = () => {
 
   useLayoutEffect(() => {
     if (loading || !destination) return;
-    window.scrollTo(0, 0);
     
     const ctx = gsap.context(() => {
       gsap.fromTo('.dest-details-reveal',
@@ -129,7 +128,7 @@ const DestinationDetailsPage = () => {
           <ImageCarousel images={destination.images && destination.images.length > 0 ? destination.images : [destination.img]} className="w-full h-full" alwaysShowArrows darkOverlay darkOverlayOpacity="bg-black/40" />
         </div>
         
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 pointer-events-none">
           <div className="dest-details-reveal">
             <span className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-[#fdfbf7] text-xs tracking-[0.2em] uppercase mb-6 inline-block font-bold">
               {destination.category}

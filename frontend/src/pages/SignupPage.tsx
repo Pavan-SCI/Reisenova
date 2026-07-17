@@ -1,10 +1,11 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import { ArrowLeft, User, Mail, Lock, Phone, ArrowRight, Palmtree, Sun } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
 import { signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider, db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import ReisenovaLogo from '../components/ReisenovaLogo';
 
 const SignupPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,12 +30,32 @@ const SignupPage = () => {
 
   const navigate = useNavigate();
 
+  const [countryCode, setCountryCode] = useState('+94');
+
+  const countryCodes = [
+    { code: '+94', name: 'LK' },
+    { code: '+1', name: 'US/CA' },
+    { code: '+44', name: 'UK' },
+    { code: '+61', name: 'AU' },
+    { code: '+91', name: 'IN' },
+    { code: '+49', name: 'DE' },
+    { code: '+33', name: 'FR' },
+    { code: '+81', name: 'JP' },
+    { code: '+86', name: 'CN' },
+    { code: '+971', name: 'AE' },
+    { code: '+65', name: 'SG' },
+    { code: '+60', name: 'MY' },
+    { code: '+39', name: 'IT' },
+    { code: '+7', name: 'RU' }
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const email = (formRef.current?.elements.namedItem('email') as HTMLInputElement)?.value;
     const password = (formRef.current?.elements.namedItem('password') as HTMLInputElement)?.value;
     const name = (formRef.current?.elements.namedItem('name') as HTMLInputElement)?.value;
-    const phone = (formRef.current?.elements.namedItem('phone') as HTMLInputElement)?.value;
+    const phoneInput = (formRef.current?.elements.namedItem('phone') as HTMLInputElement)?.value;
+    const phone = phoneInput ? `${countryCode} ${phoneInput}` : '';
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -47,6 +68,10 @@ const SignupPage = () => {
         phone: phone || '',
         createdAt: new Date().toISOString()
       });
+
+      const isDarkMode = localStorage.getItem('darkMode');
+      localStorage.clear();
+      if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
 
       localStorage.setItem('isUserLoggedIn', 'true');
       localStorage.setItem('userEmail', userCredential.user.email || '');
@@ -74,6 +99,10 @@ const SignupPage = () => {
         phone: result.user.phoneNumber || '',
         createdAt: new Date().toISOString()
       }, { merge: true });
+      
+      const isDarkMode = localStorage.getItem('darkMode');
+      localStorage.clear();
+      if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
 
       localStorage.setItem('isUserLoggedIn', 'true');
       localStorage.setItem('userEmail', result.user.email || '');
@@ -82,7 +111,11 @@ const SignupPage = () => {
       navigate('/');
     } catch (error: any) {
       console.error('Google sign up error:', error);
-      setErrorMsg(error.message || 'Failed to sign up with Google');
+      if (error.code === 'auth/unauthorized-domain') {
+        setErrorMsg('Error: Domain not authorized. Add ' + window.location.hostname + ' to Firebase Auth -> Settings -> Authorized domains.');
+      } else {
+        setErrorMsg(error.message || 'Failed to sign up with Google');
+      }
     }
   };
 
@@ -99,20 +132,8 @@ const SignupPage = () => {
       <div className="max-w-[1200px] mx-auto px-6 md:px-12 relative z-10 w-full flex justify-center items-center h-full">
         <div className="w-full max-w-md">
           <div className="mb-8 signup-reveal text-center flex flex-col items-center">
-            <Link to="/" className="inline-flex flex-col items-center mb-6 group cursor-pointer">
-              <div className="relative flex items-center justify-center h-12 w-16 mb-2">
-                <Palmtree size={40} className="text-forest dark:text-[#fdfbf7] absolute left-0 bottom-0 z-10 -rotate-12 group-hover:rotate-0 transition-all duration-500" />
-                <Palmtree size={28} className="text-forest dark:text-[#fdfbf7] absolute right-2 bottom-1 z-10 rotate-12 group-hover:rotate-0 transition-all duration-500" />
-                <Sun size={24} className="text-orange absolute bottom-2 left-5 z-0 fill-current group-hover:scale-125 transition-transform duration-700" />
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-orange font-serif text-3xl tracking-[0.2em] uppercase font-bold italic leading-none group-hover:text-forest dark:group-hover:text-[#fdfbf7] transition-colors duration-500">
-                  Reisenova
-                </span>
-                <span className="text-forest dark:text-[#fdfbf7] text-[10px] tracking-[0.3em] font-medium uppercase mt-2 pl-1 transition-colors duration-500">
-                  Travel & Tours
-                </span>
-              </div>
+            <Link to="/" className="mb-6 group cursor-pointer block">
+              <ReisenovaLogo iconSize="md" isCentered={true} />
             </Link>
 
             <h2 className="text-4xl md:text-5xl font-serif text-forest dark:text-[#fdfbf7] mb-4 leading-tight drop-shadow-md">
@@ -162,14 +183,24 @@ const SignupPage = () => {
 
               <div className="flex flex-col gap-2 relative">
                 <label className="text-xs font-semibold uppercase tracking-widest text-forest/70 dark:text-[#fdfbf7]/70">Phone Number</label>
-                <div className="relative">
+                <div className="flex relative">
                   <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-forest/50 dark:text-[#fdfbf7]/50" />
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="w-1/3 bg-transparent border-b border-forest/20 dark:border-[#fdfbf7]/20 p-3 pl-10 pr-2 outline-none focus:border-orange transition-colors duration-300 text-forest dark:text-[#fdfbf7] cursor-pointer appearance-none"
+                    style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+                  >
+                    {countryCodes.map(c => (
+                      <option key={c.code} value={c.code} className="bg-white dark:bg-[#0a0f0d]">{c.code} {c.name}</option>
+                    ))}
+                  </select>
                   <input 
                     name="phone"
                     type="tel" 
                     required 
-                    className="w-full bg-transparent border-b border-forest/20 dark:border-[#fdfbf7]/20 p-3 pl-10 outline-none focus:border-orange transition-colors duration-300 text-forest dark:text-[#fdfbf7] placeholder:text-forest/30 dark:text-[#fdfbf7]/30" 
-                    placeholder="+1 234 567 8900" 
+                    className="w-2/3 bg-transparent border-b border-forest/20 dark:border-[#fdfbf7]/20 p-3 pl-4 outline-none focus:border-orange transition-colors duration-300 text-forest dark:text-[#fdfbf7] placeholder:text-forest/30 dark:text-[#fdfbf7]/30" 
+                    placeholder="71 234 5678" 
                   />
                 </div>
               </div>

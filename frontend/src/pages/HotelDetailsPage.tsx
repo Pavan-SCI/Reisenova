@@ -1,8 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowLeft, MapPin, Star, Coffee, Wifi, Waves, Wind, Shield, CheckCircle } from 'lucide-react';
 import ImageCarousel from '../components/ImageCarousel';
+import PhonePromptModal from '../components/PhonePromptModal';
+import { checkAndGetUserPhone } from '../utils/bookingHelper';
 
 const hotelData = {
   'amanwella': {
@@ -88,6 +90,8 @@ const HotelDetailsPage = () => {
   const [isBooked, setIsBooked] = React.useState(false);
   const navigate = useNavigate();
 
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+
   const handleBookClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     const isUser = localStorage.getItem('isUserLoggedIn') === 'true';
@@ -98,13 +102,26 @@ const HotelDetailsPage = () => {
       navigate('/login');
       return;
     }
+
+    const phone = await checkAndGetUserPhone(userId || '');
+    if (phone) {
+      executeBooking(phone);
+    } else {
+      setIsPhoneModalOpen(true);
+    }
+  };
+
+  const executeBooking = async (phone: string) => {
+    const userEmail = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId');
     try {
       const payload = {
         userId: userId || userEmail || 'unknown_user',
         userEmail: userEmail || 'unknown_user',
         hotelId: hotel?.id || id,
         hotelDetails: hotel,
-        guests: 1
+        guests: 1,
+        userPhone: phone
       };
       const res = await fetch('/api/bookings/hotel', {
         method: 'POST',
@@ -113,7 +130,8 @@ const HotelDetailsPage = () => {
       });
       if (res.ok) {
         alert('Hotel booked successfully!');
-      setIsBooked(true);
+        setIsBooked(true);
+        setIsPhoneModalOpen(false);
       } else {
         alert('Failed to book hotel.');
       }
@@ -174,7 +192,6 @@ const HotelDetailsPage = () => {
 
   useLayoutEffect(() => {
     if (loading || !hotel) return;
-    window.scrollTo(0, 0);
     
     const ctx = gsap.context(() => {
       gsap.fromTo('.hotel-details-reveal',
@@ -231,7 +248,7 @@ const HotelDetailsPage = () => {
           <ImageCarousel images={hotel.images && hotel.images.length > 0 ? hotel.images : [hotel.img]} className="w-full h-full" alwaysShowArrows darkOverlay darkOverlayOpacity="bg-black/40" />
         </div>
         
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 pointer-events-none">
           <div className="hotel-details-reveal flex items-center gap-2 mb-6">
             <span className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-[#fdfbf7] text-xs tracking-[0.2em] uppercase font-bold">
               {hotel.type}
@@ -333,6 +350,12 @@ const HotelDetailsPage = () => {
           </div>
         </div>
       </div>
+      <PhonePromptModal
+        isOpen={isPhoneModalOpen}
+        onClose={() => setIsPhoneModalOpen(false)}
+        userId={localStorage.getItem('userId') || ''}
+        onSuccess={(phone) => executeBooking(phone)}
+      />
     </section>
   );
 };

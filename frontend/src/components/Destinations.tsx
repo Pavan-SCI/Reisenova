@@ -26,23 +26,19 @@ const Destinations = () => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // ── Card entrance stagger (matching Luxury Stays style) ──
+      // ── Card entrance stagger ──
       gsap.fromTo(
         cardsRef.current,
-        { y: 150, opacity: 0, rotateX: 25, z: -200, scale: 0.9 },
+        { y: 100, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          rotateX: 0,
-          z: 0,
-          scale: 1,
+          duration: 0.8,
           stagger: 0.1,
-          ease: 'power2.out',
+          ease: 'power3.out',
           scrollTrigger: {
             trigger: containerRef.current,
             start: 'top 85%',
-            end: 'center center',
-            scrub: 1.5,
           },
         }
       );
@@ -62,90 +58,58 @@ const Destinations = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
-
-  // quickTo setters — created once per card, reused on every mousemove (no new tween spam)
-  const quickRotX = useRef<((val: number) => void)[]>([]);
-  const quickRotY = useRef<((val: number) => void)[]>([]);
-  const quickImgX = useRef<((val: number) => void)[]>([]);
-  const quickImgY = useRef<((val: number) => void)[]>([]);
-  const rafRef    = useRef<number | null>(null);
-
-  const initQuickTo = (idx: number) => {
-    const card = cardsRef.current[idx];
-    if (!card || quickRotX.current[idx]) return;
-
-    // ✅ Set perspective + preserve-3d so rotation looks truly 3D
-    gsap.set(card, { transformPerspective: 900, transformStyle: 'preserve-3d' });
-
-    const img = card.querySelector('img');
-    quickRotX.current[idx] = gsap.quickTo(card, 'rotateX', { duration: 0.5, ease: 'power3.out' });
-    quickRotY.current[idx] = gsap.quickTo(card, 'rotateY', { duration: 0.5, ease: 'power3.out' });
-    if (img) {
-      gsap.set(img, { transformStyle: 'preserve-3d' });
-      quickImgX.current[idx] = gsap.quickTo(img, 'x', { duration: 0.5, ease: 'power3.out' });
-      quickImgY.current[idx] = gsap.quickTo(img, 'y', { duration: 0.5, ease: 'power3.out' });
-    }
-
-    // Also set preserve-3d on text layers
-    card.querySelectorAll('[data-tilt-layer]').forEach(el => {
-      gsap.set(el, { transformStyle: 'preserve-3d' });
-    });
-  };
+  }, [displayDests]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
     const card = cardsRef.current[idx];
     if (!card) return;
-    initQuickTo(idx);
-
-    // Cancel any pending RAF to avoid queuing up
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-
-    rafRef.current = requestAnimationFrame(() => {
-      const rect = card.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-
-      // Normalised -1 → 1
-      const nx = (x / rect.width)  * 2 - 1;   // left=-1, right=+1
-      const ny = (y / rect.height) * 2 - 1;   // top=-1, bottom=+1
-
-      // Dead-zone at 12% from edges — prevents jiggle when cursor grazes border
-      const DZ = 0.12;
-      const cx = Math.abs(nx) > (1 - DZ) ? Math.sign(nx) * (1 - DZ) : nx;
-      const cy = Math.abs(ny) > (1 - DZ) ? Math.sign(ny) * (1 - DZ) : ny;
-
-      const MAX_ROT = 13;
-      const rotX = cy * -MAX_ROT;   // tilt forward when cursor is at bottom
-      const rotY = cx *  MAX_ROT;   // tilt right when cursor is at right
-
-      quickRotX.current[idx]?.(rotX);
-      quickRotY.current[idx]?.(rotY);
-      quickImgX.current[idx]?.(cx * -12);
-      quickImgY.current[idx]?.(cy * -12);
-
-      gsap.to(card.querySelector('img'), { scale: 1.12, duration: 0.6, ease: 'power2.out' });
+    
+    // Calculate relative to the outer container (currentTarget) which doesn't rotate
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = ((y - centerY) / centerY) * -15;
+    const rotateY = ((x - centerX) / centerX) * 15;
+    
+    gsap.to(card, {
+      rotateX,
+      rotateY,
+      transformPerspective: 1200,
+      ease: 'power2.out',
+      duration: 0.5,
+    });
+    
+    const img = card.querySelector('img');
+    gsap.to(img, {
+      x: ((x - centerX) / centerX) * -15,
+      y: ((y - centerY) / centerY) * -15,
+      scale: 1.15,
+      duration: 0.5,
+      ease: 'power2.out',
     });
   };
 
   const handleMouseLeave = (idx: number) => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
     const card = cardsRef.current[idx];
     if (!card) return;
 
-    // Smooth snap-back — power3.out, NO elastic (elastic causes the bounce-jiggle)
     gsap.to(card, {
-      rotateX: 0, rotateY: 0,
-      duration: 0.8,
+      rotateX: 0,
+      rotateY: 0,
       ease: 'power3.out',
+      duration: 0.8,
     });
+    
     const img = card.querySelector('img');
     gsap.to(img, {
-      x: 0, y: 0, scale: 1,
-      duration: 0.8,
+      x: 0,
+      y: 0,
+      scale: 1,
+      duration: 1.5,
       ease: 'power3.out',
     });
   };
@@ -170,41 +134,31 @@ const Destinations = () => {
           {displayDests.map((dest, index) => (
             <div 
               key={dest.name}
-              ref={el => cardsRef.current[index] = el}
               onMouseMove={(e) => handleMouseMove(e, index)}
               onMouseLeave={() => handleMouseLeave(index)}
               onClick={() => navigate(`/destinations/${dest.id || dest.name.toLowerCase()}`)}
-              className="group relative h-[550px] rounded-2xl cursor-pointer will-change-transform shadow-xl hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.45)] transition-shadow duration-500"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="relative h-[550px] cursor-none"
+              style={{ perspective: '1400px' }}
             >
-              {/* Parallax clip container */}
-              <div className="dest-img-container absolute inset-0 rounded-2xl overflow-hidden" style={{ transformStyle: 'preserve-3d' }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
+              <div
+                ref={el => cardsRef.current[index] = el}
+                className="group relative w-full h-full overflow-hidden rounded-2xl shadow-xl hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.45)] transition-shadow duration-500 bg-[#fdfbf7] dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10 pointer-events-none opacity-0"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-500 pointer-events-none" />
                 <img 
                   src={dest.img} 
                   alt={dest.name} 
-                  className="w-[115%] max-w-none h-[115%] -left-[7.5%] -top-[7.5%] absolute object-cover will-change-transform pointer-events-none"
+                  className="w-[115%] max-w-none h-[115%] -left-[7.5%] -top-[7.5%] absolute object-cover pointer-events-none"
                 />
-              </div>
 
-              {/* Text — floats above card in Z-space for real depth */}
-              <div
-                data-tilt-layer
-                className="absolute bottom-0 left-0 p-8 z-20"
-                style={{ transform: 'translateZ(60px)', transformStyle: 'preserve-3d' }}
-              >
-                <h3
-                  className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg"
-                  style={{ transform: 'translateZ(20px)' }}
-                >
-                  {dest.name}
-                </h3>
-                <p
-                  className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100"
-                  style={{ transform: 'translateZ(30px)' }}
-                >
-                  {dest.desc}
-                </p>
+                <div className="absolute bottom-0 left-0 p-8 z-20 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 pointer-events-none">
+                  <h3 className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg pointer-events-none">
+                    {dest.name}
+                  </h3>
+                  <p className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none">
+                    {dest.desc}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

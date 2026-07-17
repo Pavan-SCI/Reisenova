@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { Facebook, Twitter, Instagram, Youtube, ArrowRight } from 'lucide-react';
 
@@ -53,20 +54,20 @@ const Footer = () => {
           <div className="footer-reveal">
             <h4 className="text-forest dark:text-[#fdfbf7] uppercase tracking-[0.2em] text-sm font-bold mb-8">Explore</h4>
             <ul className="space-y-5 text-forest/70 dark:text-[#fdfbf7]/70 font-medium">
-              <li><a href="/destinations" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Destinations</a></li>
-              <li><a href="#about" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">About Us</a></li>
-              <li><a href="/hotels" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Luxury Hotels</a></li>
-              <li><a href="/vehicles" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Premium Rentals</a></li>
-              <li><a href="/packages" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Curated Tours</a></li>
+              <li><Link to="/destinations" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Destinations</Link></li>
+              <li><Link to="/#about" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">About Us</Link></li>
+              <li><Link to="/hotels" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Luxury Hotels</Link></li>
+              <li><Link to="/vehicles" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Premium Rentals</Link></li>
+              <li><Link to="/packages" className="hover:text-orange transition-colors block transform hover:translate-x-1 duration-300">Curated Tours</Link></li>
             </ul>
           </div>
 
           <div className="footer-reveal">
             <h4 className="text-forest dark:text-[#fdfbf7] uppercase tracking-[0.2em] text-sm font-bold mb-8">Contact</h4>
             <ul className="space-y-5 text-forest/70 dark:text-[#fdfbf7]/70 font-medium">
-              <li><a href="mailto:info@reisenova.com" className="hover:text-orange transition-colors">info@reisenova.com</a></li>
-              <li>+94 11 234 5678</li>
-              <li>Colombo, Sri Lanka</li>
+              <li><a href="mailto:reisenovatravels@gmail.com" className="hover:text-orange transition-colors">reisenovatravels@gmail.com</a></li>
+              <li>+94 713850594</li>
+              <li>Bentota, Sri Lanka</li>
             </ul>
             
             <div className="flex gap-4 mt-10">

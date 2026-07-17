@@ -2,12 +2,17 @@ import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { Star, ArrowLeft, Plus, Edit, Trash, X } from 'lucide-react';
+import PhonePromptModal from '../components/PhonePromptModal';
+import { checkAndGetUserPhone } from '../utils/bookingHelper';
 
 const HotelsPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [hotels, setHotels] = useState<any[]>([]);
   const [bookedItemIds, setBookedItemIds] = useState<Set<string>>(new Set());
+  
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [pendingHotel, setPendingHotel] = useState<any>(null);
   
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -98,41 +103,26 @@ const HotelsPage = () => {
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.hotel-reveal',
-        { y: 50, opacity: 0 },
-        {
-          y: 0, opacity: 1,
-          stagger: 0.1,
-          duration: 1,
-          ease: 'power3.out',
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  useLayoutEffect(() => {
-    if (hotels.length === 0) return;
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray('.hotel-card-page').forEach((card: any) => {
-        gsap.fromTo(card, 
-          { y: 100, opacity: 0, },
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.hotel-reveal',
+          { y: 50, opacity: 0 },
           {
-            y: 0, opacity: 1, 
-            duration: 0.8,
+            y: 0, opacity: 1,
+            stagger: 0.1,
+            duration: 1,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-            }
           }
         );
       });
-    }, containerRef);
-    return () => ctx.revert();
-  }, [hotels]);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
+  }, []);
 
   const handleEditClick = (e: React.MouseEvent, hotel: any) => {
     e.stopPropagation();
@@ -217,13 +207,26 @@ const HotelsPage = () => {
       return;
     }
 
+    const phone = await checkAndGetUserPhone(userId || '');
+    if (phone) {
+      executeBooking(hotel, phone);
+    } else {
+      setPendingHotel(hotel);
+      setIsPhoneModalOpen(true);
+    }
+  };
+
+  const executeBooking = async (hotel: any, phone: string) => {
+    const userEmail = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId');
     try {
       const payload = {
         userId: userId || userEmail || 'unknown_user', // fallback
         userEmail: userEmail || 'unknown_user',
         hotelId: hotel.id || hotel.name.toLowerCase().replace(/\s+/g, '-'),
         hotelDetails: hotel,
-        guests: 1
+        guests: 1,
+        userPhone: phone
       };
       
       const res = await fetch('/api/bookings/hotel', {
@@ -235,6 +238,7 @@ const HotelsPage = () => {
       if (res.ok) {
         alert('Hotel booked successfully!');
         setBookedItemIds(prev => new Set(prev).add(hotel.id));
+        setIsPhoneModalOpen(false);
       } else {
         alert('Failed to book hotel.');
       }
@@ -261,7 +265,7 @@ const HotelsPage = () => {
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
         
-        <div className="mb-20 hotel-reveal text-center max-w-3xl mx-auto">
+        <div className="mb-20 hotel-reveal text-center max-w-3xl mx-auto opacity-0">
           <p className="text-orange uppercase tracking-[0.4em] text-sm font-semibold mb-6">Premium Accommodation</p>
           <h2 className="text-5xl md:text-7xl font-serif mb-6 leading-tight drop-shadow-sm text-forest dark:text-[#fdfbf7]">
             Luxury <span className="italic text-orange font-light">Stays</span>
@@ -341,13 +345,13 @@ const HotelsPage = () => {
     {isModalOpen && (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setIsModalOpen(false)}>
         <div className="bg-[#fdfbf7] dark:bg-[#121915] text-forest dark:text-[#fdfbf7] p-8 rounded-2xl w-full max-w-2xl shadow-2xl relative" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors">
+          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors z-10">
             <X size={24} />
           </button>
           
           <h2 className="text-3xl font-serif mb-6">{editingHotel ? 'Edit Hotel' : 'Add New Hotel'}</h2>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar" data-lenis-prevent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Name</label>
@@ -421,6 +425,17 @@ const HotelsPage = () => {
         </div>
       </div>
     )}
+    
+    <PhonePromptModal
+      isOpen={isPhoneModalOpen}
+      onClose={() => setIsPhoneModalOpen(false)}
+      userId={localStorage.getItem('userId') || ''}
+      onSuccess={(phone) => {
+        if (pendingHotel) {
+          executeBooking(pendingHotel, phone);
+        }
+      }}
+    />
     </>
   );
 };

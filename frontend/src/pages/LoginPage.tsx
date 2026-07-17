@@ -1,9 +1,10 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import { ArrowLeft, User, Lock, ArrowRight, Palmtree, Sun } from 'lucide-react';
+import { ArrowLeft, User, Lock, ArrowRight } from 'lucide-react';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
+import ReisenovaLogo from '../components/ReisenovaLogo';
 
 const LoginPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,13 @@ const LoginPage = () => {
     const password = (formRef.current?.elements.namedItem('password') as HTMLInputElement)?.value;
 
     if (email === 'admin@reisenova.com' && password === 'admin') {
+      const isDarkMode = localStorage.getItem('darkMode');
+      localStorage.clear();
+      if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
+      
       localStorage.setItem('isAdminLoggedIn', 'true');
+      localStorage.setItem('userEmail', 'admin@reisenova.com');
+      localStorage.setItem('userName', 'Admin User');
       navigate('/');
       return;
     }
@@ -42,6 +49,10 @@ const LoginPage = () => {
     if (email && password) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const isDarkMode = localStorage.getItem('darkMode');
+        localStorage.clear();
+        if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
+
         localStorage.setItem('isUserLoggedIn', 'true');
         localStorage.setItem('userEmail', userCredential.user.email || '');
         localStorage.setItem('userId', userCredential.user.uid);
@@ -60,6 +71,11 @@ const LoginPage = () => {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      
+      const isDarkMode = localStorage.getItem('darkMode');
+      localStorage.clear();
+      if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
+
       localStorage.setItem('isUserLoggedIn', 'true');
       localStorage.setItem('userEmail', result.user.email || '');
       localStorage.setItem('userId', result.user.uid);
@@ -67,7 +83,11 @@ const LoginPage = () => {
       navigate('/');
     } catch (error: any) {
       console.error('Google login error:', error);
-      setErrorMsg(error.message || 'Failed to sign in with Google');
+      if (error.code === 'auth/unauthorized-domain') {
+        setErrorMsg('Error: Domain not authorized. Add ' + window.location.hostname + ' to Firebase Auth -> Settings -> Authorized domains.');
+      } else {
+        setErrorMsg(error.message || 'Failed to sign in with Google');
+      }
     }
   };
 
@@ -84,20 +104,8 @@ const LoginPage = () => {
       <div className="max-w-[1200px] mx-auto px-6 md:px-12 relative z-10 w-full flex justify-center items-center h-full">
         <div className="w-full max-w-md">
           <div className="mb-8 login-reveal text-center flex flex-col items-center">
-            <Link to="/" className="inline-flex flex-col items-center mb-6 group cursor-pointer">
-              <div className="relative flex items-center justify-center h-12 w-16 mb-2">
-                <Palmtree size={40} className="text-forest dark:text-[#fdfbf7] absolute left-0 bottom-0 z-10 -rotate-12 group-hover:rotate-0 transition-all duration-500" />
-                <Palmtree size={28} className="text-forest dark:text-[#fdfbf7] absolute right-2 bottom-1 z-10 rotate-12 group-hover:rotate-0 transition-all duration-500" />
-                <Sun size={24} className="text-orange absolute bottom-2 left-5 z-0 fill-current group-hover:scale-125 transition-transform duration-700" />
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-orange font-serif text-3xl tracking-[0.2em] uppercase font-bold italic leading-none group-hover:text-forest dark:group-hover:text-[#fdfbf7] transition-colors duration-500">
-                  Reisenova
-                </span>
-                <span className="text-forest dark:text-[#fdfbf7] text-[10px] tracking-[0.3em] font-medium uppercase mt-2 pl-1 transition-colors duration-500">
-                  Travel & Tours
-                </span>
-              </div>
+            <Link to="/" className="mb-6 group cursor-pointer block">
+              <ReisenovaLogo iconSize="md" isCentered={true} />
             </Link>
 
             <h2 className="text-4xl md:text-5xl font-serif text-forest dark:text-[#fdfbf7] mb-4 leading-tight drop-shadow-md">

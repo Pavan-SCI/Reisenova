@@ -2,12 +2,17 @@ import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowLeft, Calendar, MapPin, Clock, Plus, Edit, Trash, X } from 'lucide-react';
+import PhonePromptModal from '../components/PhonePromptModal';
+import { checkAndGetUserPhone } from '../utils/bookingHelper';
 
 const PackagesPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [packages, setPackages] = useState<any[]>([]);
   const [bookedItemIds, setBookedItemIds] = useState<Set<string>>(new Set());
+  
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [pendingPkg, setPendingPkg] = useState<any>(null);
   
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -98,41 +103,26 @@ const PackagesPage = () => {
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.pkg-reveal',
-        { y: 50, opacity: 0 },
-        {
-          y: 0, opacity: 1,
-          stagger: 0.1,
-          duration: 1,
-          ease: 'power3.out',
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  useLayoutEffect(() => {
-    if (packages.length === 0) return;
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray('.pkg-card').forEach((card: any) => {
-        gsap.fromTo(card, 
-          { y: 100, opacity: 0 },
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.pkg-reveal',
+          { y: 50, opacity: 0 },
           {
             y: 0, opacity: 1,
-            duration: 0.8,
+            stagger: 0.1,
+            duration: 1,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-            }
           }
         );
       });
-    }, containerRef);
-    return () => ctx.revert();
-  }, [packages]);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
+  }, []);
 
   const handleEditClick = (e: React.MouseEvent, pkg: any) => {
     e.stopPropagation();
@@ -217,12 +207,25 @@ const PackagesPage = () => {
       return;
     }
 
+    const phone = await checkAndGetUserPhone(userId || '');
+    if (phone) {
+      executeBooking(pkg, phone);
+    } else {
+      setPendingPkg(pkg);
+      setIsPhoneModalOpen(true);
+    }
+  };
+
+  const executeBooking = async (pkg: any, phone: string) => {
+    const userEmail = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId');
     try {
       const payload = {
         userId: userId || userEmail || 'unknown_user', // fallback
         userEmail: userEmail || 'unknown_user',
         packageId: pkg.id,
-        packageDetails: pkg
+        packageDetails: pkg,
+        userPhone: phone
       };
       
       const res = await fetch('/api/bookings/package', {
@@ -234,6 +237,7 @@ const PackagesPage = () => {
       if (res.ok) {
         alert('Package booked successfully!');
         setBookedItemIds(prev => new Set(prev).add(pkg.id));
+        setIsPhoneModalOpen(false);
       } else {
         alert('Failed to book package.');
       }
@@ -256,7 +260,7 @@ const PackagesPage = () => {
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
         
-        <div className="mb-16 md:mb-20 pkg-reveal text-center max-w-3xl mx-auto">
+        <div className="mb-16 md:mb-20 pkg-reveal text-center max-w-3xl mx-auto opacity-0">
           <p className="text-orange uppercase tracking-[0.4em] text-sm font-semibold mb-6">Curated Experiences</p>
           <h2 className="text-5xl md:text-7xl font-serif mb-6 leading-tight drop-shadow-sm text-forest dark:text-[#fdfbf7]">
             Our Tour <br />
@@ -347,13 +351,13 @@ const PackagesPage = () => {
     {isModalOpen && (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setIsModalOpen(false)}>
         <div className="bg-[#fdfbf7] dark:bg-[#121915] text-forest dark:text-[#fdfbf7] p-8 rounded-2xl w-full max-w-2xl shadow-2xl relative" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors">
+          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors z-10">
             <X size={24} />
           </button>
           
           <h2 className="text-3xl font-serif mb-6">{editingPkg ? 'Edit Package' : 'Add New Package'}</h2>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar" data-lenis-prevent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Title</label>
@@ -429,6 +433,17 @@ const PackagesPage = () => {
         </div>
       </div>
     )}
+    
+    <PhonePromptModal
+      isOpen={isPhoneModalOpen}
+      onClose={() => setIsPhoneModalOpen(false)}
+      userId={localStorage.getItem('userId') || ''}
+      onSuccess={(phone) => {
+        if (pendingPkg) {
+          executeBooking(pendingPkg, phone);
+        }
+      }}
+    />
     </>
   );
 };

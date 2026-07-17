@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
-import { Edit, Save } from 'lucide-react';
+import { Edit, Save, Info } from 'lucide-react';
 import gsap from 'gsap';
 
 const defaultImages = [
@@ -155,23 +155,38 @@ const Gallery = () => {
 
         <div className={`${isEditing ? 'w-full px-6 mb-12 max-w-[1400px] mx-auto z-20' : 'absolute top-12 left-6 md:left-12 z-20'}`}>
           {isEditing ? (
-            <div className="space-y-4 max-w-md bg-white/10 p-4 rounded-xl backdrop-blur-md">
-              <input 
-                type="text" 
-                name="galleryTitle1" 
-                value={settings.galleryTitle1} 
-                onChange={handleChange} 
-                className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-forest" 
-                placeholder="Title Line 1"
-              />
-              <input 
-                type="text" 
-                name="galleryTitle2" 
-                value={settings.galleryTitle2} 
-                onChange={handleChange} 
-                className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-orange" 
-                placeholder="Title Line 2"
-              />
+            <div className="space-y-4 max-w-lg">
+              {/* Image size recommendation banner */}
+              <div className="bg-[#fff9e6] dark:bg-[#1f1a10] border border-[#ffb74d] text-[#e65100] dark:text-[#ffb74d] p-4 rounded-xl flex items-start gap-3 shadow-md mb-4 text-xs md:text-sm">
+                <Info className="shrink-0 mt-0.5 text-orange" size={20} />
+                <div className="space-y-1 font-medium">
+                  <p className="font-bold">Recommended Image Dimensions for perfect, crop-free display:</p>
+                  <p className="opacity-95">• 1400 x 800 pixels (or any landscape image with a 16:9 aspect ratio)</p>
+                  <div className="pt-1.5 border-t border-[#ffb74d]/30 mt-1.5">
+                    <p className="font-bold">කැපී යාම වළක්වා (Crop නොවී) පින්තූරය නිවැරදිව දර්ශනය වීමට නිර්දේශිත ප්‍රමාණය:</p>
+                    <p className="opacity-95">• 1400 x 800 pixels (හෝ 16:9 Landscape අනුපාතයේ පින්තූරයක්)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 bg-white/10 p-4 rounded-xl backdrop-blur-md">
+                <input 
+                  type="text" 
+                  name="galleryTitle1" 
+                  value={settings.galleryTitle1} 
+                  onChange={handleChange} 
+                  className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-forest" 
+                  placeholder="Title Line 1"
+                />
+                <input 
+                  type="text" 
+                  name="galleryTitle2" 
+                  value={settings.galleryTitle2} 
+                  onChange={handleChange} 
+                  className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-orange" 
+                  placeholder="Title Line 2"
+                />
+              </div>
             </div>
           ) : (
             <h2 className="text-4xl md:text-6xl font-serif text-forest dark:text-[#fdfbf7] tracking-tight drop-shadow-sm">

@@ -3,8 +3,27 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { auth, db } from '../lib/firebase';
-import { ArrowLeft, User, Map, Settings, Heart, LogOut, Camera, Edit2, Calendar, MapPin, ChevronRight, Palmtree, Sun } from 'lucide-react';
+import { auth, db, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ArrowLeft, User, Map, Settings, Heart, LogOut, Camera, Edit2, Calendar, MapPin, ChevronRight, Loader2, Image } from 'lucide-react';
+import LeafSettings from '../components/LeafSettings';
+import ReisenovaLogo from '../components/ReisenovaLogo';
+
+const formatPrice = (price: any) => {
+  if (!price) return 'Contact Us';
+  const str = String(price).trim();
+  if (str.includes('$')) return str;
+  if (/^\d/.test(str)) {
+    return `$${str}`;
+  }
+  if (/^from\s+\d/i.test(str)) {
+    return str.replace(/^from\s+/i, 'From $');
+  }
+  if (/[0-9]/.test(str)) {
+    return `$${str}`;
+  }
+  return str;
+};
 
 const ProfilePage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -12,26 +31,37 @@ const ProfilePage = () => {
   const [userName, setUserName] = useState<string>('Explorer');
   const [profileImage, setProfileImage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64String = reader.result as string;
-        setProfileImage(base64String);
-        localStorage.setItem('userProfileImage', base64String);
-        
-        try {
-          const userId = localStorage.getItem('userId');
-          if (userId) {
-            await setDoc(doc(db, 'users', userId), { profileImage: base64String }, { merge: true });
-          }
-        } catch (err) {
-          console.error("Error saving profile image", err);
-        }
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      try {
+        setIsUploadingImage(true);
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          const storageRef = ref(storage, `profile_images/${userId}_${Date.now()}_${file.name}`);
+          const snapshot = await uploadBytes(storageRef, file);
+          const downloadURL = await getDownloadURL(snapshot.ref);
+          
+          setProfileImage(downloadURL);
+          localStorage.setItem('userProfileImage', downloadURL);
+          
+          await setDoc(doc(db, 'users', userId), { profileImage: downloadURL }, { merge: true });
+        }
+      } catch (err) {
+        console.error("Error saving profile image", err);
+      } finally {
+        setIsUploadingImage(false);
+      }
     }
   };
   const [userEmailAddress, setUserEmailAddress] = useState<string>('');
@@ -255,12 +285,8 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
       <div className="max-w-[1200px] mx-auto px-6 md:px-12 relative z-10">
         
         <div className="mb-12 profile-reveal text-center flex flex-col items-center">
-          <Link to="/" className="inline-flex flex-col items-center mb-8 group cursor-pointer">
-            <div className="relative flex items-center justify-center h-12 w-16 mb-2">
-              <Palmtree size={40} className="text-black dark:text-[#fdfbf7] absolute left-0 bottom-0 z-10 -rotate-12 group-hover:rotate-0 transition-all duration-500" />
-              <Palmtree size={28} className="text-black dark:text-[#fdfbf7] absolute right-2 bottom-1 z-10 rotate-12 group-hover:rotate-0 transition-all duration-500" />
-              <Sun size={24} className="text-orange absolute bottom-2 left-5 z-0 fill-current group-hover:scale-125 transition-transform duration-700" />
-            </div>
+          <Link to="/" className="mb-8 group cursor-pointer block">
+            <ReisenovaLogo iconSize="md" isCentered={true} />
           </Link>
           <h2 className="text-4xl md:text-5xl font-serif text-black dark:text-[#fdfbf7] mb-2 leading-tight drop-shadow-md">
             My <span className="italic text-orange font-light">Account</span>
@@ -283,7 +309,7 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                     </div>
                   </div>
                   <div className="absolute bottom-0 right-0 bg-orange text-white p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                    <Camera size={14} />
+                    {isUploadingImage ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
                   </div>
                   <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
                 </div>
@@ -314,12 +340,22 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                   <Settings size={18} />
                   Settings
                 </button>
+                {isAdmin && (
+                  <button 
+                    onClick={() => setActiveTab('leaves')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm tracking-wide font-medium ${activeTab === 'leaves' ? 'bg-orange text-white shadow-lg' : 'text-[#fdfbf7] hover:bg-forest/5 dark:hover:bg-[#fdfbf7]/5 hover:text-orange dark:hover:text-orange'}`}
+                  >
+                    <Image size={18} />
+                    Manage Corner Leaves
+                  </button>
+                )}
               </nav>
 
               <button 
                 onClick={() => {
-                  localStorage.removeItem('isAdminLoggedIn');
-                  localStorage.removeItem('isUserLoggedIn');
+                  const isDarkMode = localStorage.getItem('darkMode');
+                  localStorage.clear();
+                  if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
                   window.location.href = '/';
                 }}
                 className="w-full flex items-center justify-center gap-2 mt-8 px-4 py-3 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-sm tracking-widest uppercase font-bold"
@@ -386,7 +422,7 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                     <div className="flex flex-col gap-2">
                       <label className="text-xs font-semibold uppercase tracking-widest text-[#fdfbf7]/70">Date of Birth</label>
                       {isEditing ? (
-                        <input type="date" value={editData.dob} onChange={e => setEditData({...editData, dob: e.target.value})} className="bg-transparent border-b border-orange/50 p-2 outline-none focus:border-orange transition-colors text-[#fdfbf7]" />
+                        <input type="date" value={editData.dob} onChange={e => setEditData({...editData, dob: e.target.value})} className="bg-transparent border-b border-orange/50 p-2 outline-none focus:border-orange transition-colors text-[#fdfbf7] [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" />
                       ) : (
                         <div className="text-[#fdfbf7] font-medium border-b border-[#fdfbf7]/10 pb-2">{userDob || 'Not provided'}</div>
                       )}
@@ -419,19 +455,22 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                     {packageBookings.length === 0 ? <p className="text-sm text-[#fdfbf7]/50 italic">No package bookings found.</p> : packageBookings.map((b, i) => (
                       <div key={i} className="bg-[#fdfbf7]/5 border border-[#fdfbf7]/10 p-5 rounded-2xl flex flex-col md:flex-row gap-5 items-start md:items-center">
                         <div className="w-full md:w-32 h-24 rounded-xl overflow-hidden shrink-0">
-                          <img src={b.packageDetails.image || b.packageDetails.img} alt={b.packageDetails.title} className="w-full h-full object-cover" />
+                          <img src={b.packageDetails?.image || b.packageDetails?.img} alt={b.packageDetails?.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <span className="bg-orange/20 text-orange text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 inline-block">Confirmed</span>
-                              <h4 className="font-bold text-lg">{b.packageDetails.title}</h4>
+                              {isAdmin && b.userEmail && (
+                                <span className="bg-[#fdfbf7]/20 text-[#fdfbf7] border border-[#fdfbf7]/20 text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 ml-2 inline-block">User: {b.userEmail}</span>
+                              )}
+                              <h4 className="font-bold text-lg">{b.packageDetails?.title}</h4>
                             </div>
-                            <span className="text-xl font-serif">${b.packageDetails.price || b.packageDetails.originalData?.price}</span>
+                            <span className="text-xl font-serif">${b.packageDetails?.price || b.packageDetails?.originalData?.price}</span>
                           </div>
                           <div className="flex flex-wrap gap-4 text-xs text-[#fdfbf7]/70">
-                              <div className="flex items-center gap-1.5"><Calendar size={14} /> {b.packageDetails.duration}</div>
-                              <div className="flex items-center gap-1.5"><MapPin size={14} /> {b.packageDetails.destinations?.length} Destinations</div>
+                              <div className="flex items-center gap-1.5"><Calendar size={14} /> {b.packageDetails?.duration}</div>
+                              <div className="flex items-center gap-1.5"><MapPin size={14} /> {b.packageDetails?.destinations?.length} Destinations</div>
                             </div>
                             <button onClick={() => handleCancelBooking('package', b.id)} className="mt-4 text-xs font-bold uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors">Cancel Booking</button>
                         </div>
@@ -442,18 +481,21 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                     {hotelBookings.length === 0 ? <p className="text-sm text-[#fdfbf7]/50 italic">No hotel bookings found.</p> : hotelBookings.map((b, i) => (
                       <div key={i} className="bg-[#fdfbf7]/5 border border-[#fdfbf7]/10 p-5 rounded-2xl flex flex-col md:flex-row gap-5 items-start md:items-center">
                         <div className="w-full md:w-32 h-24 rounded-xl overflow-hidden shrink-0">
-                          <img src={b.hotelDetails.image || b.hotelDetails.img} alt={b.hotelDetails.name} className="w-full h-full object-cover" />
+                          <img src={b.hotelDetails?.image || b.hotelDetails?.img} alt={b.hotelDetails?.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <span className="bg-orange/20 text-orange text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 inline-block">Confirmed</span>
-                              <h4 className="font-bold text-lg">{b.hotelDetails.name}</h4>
+                              {isAdmin && b.userEmail && (
+                                <span className="bg-[#fdfbf7]/20 text-[#fdfbf7] border border-[#fdfbf7]/20 text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 ml-2 inline-block">User: {b.userEmail}</span>
+                              )}
+                              <h4 className="font-bold text-lg">{b.hotelDetails?.name}</h4>
                             </div>
-                            <span className="text-xl font-serif">${b.hotelDetails.price || b.hotelDetails.originalData?.price} / night</span>
+                            <span className="text-xl font-serif">${b.hotelDetails?.price || b.hotelDetails?.originalData?.price} / night</span>
                           </div>
                           <div className="flex flex-wrap gap-4 text-xs text-[#fdfbf7]/70">
-                              <div className="flex items-center gap-1.5"><MapPin size={14} /> {b.hotelDetails.location}</div>
+                              <div className="flex items-center gap-1.5"><MapPin size={14} /> {b.hotelDetails?.location}</div>
                               <div className="flex items-center gap-1.5"><User size={14} /> {b.guests} Guests</div>
                             </div>
                             <button onClick={() => handleCancelBooking('hotel', b.id)} className="mt-4 text-xs font-bold uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors">Cancel Booking</button>
@@ -465,8 +507,8 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                     {vehicleBookings.length === 0 ? <p className="text-sm text-[#fdfbf7]/50 italic">No vehicle bookings found.</p> : vehicleBookings.map((b, i) => (
                       <div key={i} className="bg-[#fdfbf7]/5 border border-[#fdfbf7]/10 p-5 rounded-2xl flex flex-col md:flex-row gap-5 items-start md:items-center">
                         <div className="w-full md:w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-forest/20 flex items-center justify-center">
-                          {b.vehicleDetails.image ? (
-                             <img src={b.vehicleDetails.image} alt={b.vehicleDetails.name} className="w-full h-full object-cover" />
+                          {b.vehicleDetails?.image ? (
+                             <img src={b.vehicleDetails?.image} alt={b.vehicleDetails?.name} className="w-full h-full object-cover" />
                           ) : (
                              <span className="text-2xl">🚗</span>
                           )}
@@ -475,9 +517,12 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <span className="bg-orange/20 text-orange text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 inline-block">Confirmed</span>
-                              <h4 className="font-bold text-lg">{b.vehicleDetails.name}</h4>
+                              {isAdmin && b.userEmail && (
+                                <span className="bg-[#fdfbf7]/20 text-[#fdfbf7] border border-[#fdfbf7]/20 text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm mb-2 ml-2 inline-block">User: {b.userEmail}</span>
+                              )}
+                              <h4 className="font-bold text-lg">{b.vehicleDetails?.name}</h4>
                             </div>
-                            <span className="text-xl font-serif">{b.vehicleDetails.price}</span>
+                            <span className="text-xl font-serif">{formatPrice(b.vehicleDetails?.price)}</span>
                           </div>
                           <div className="flex flex-wrap gap-4 text-xs text-[#fdfbf7]/70">
                             {b.pickupDate && <div className="flex items-center gap-1.5"><Calendar size={14} /> Pickup: {b.pickupDate}</div>}
@@ -492,6 +537,12 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
                 </div>
               )}
               
+
+              {activeTab === 'leaves' && isAdmin && (
+                <div className="profile-reveal">
+                  <LeafSettings />
+                </div>
+              )}
 
               {activeTab === 'settings' && (
                 <div className="profile-reveal">

@@ -1,7 +1,23 @@
 import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import { ArrowLeft, Plus, Edit, Trash, X, Car, Settings, MapPin, Briefcase, Calendar, ChevronDown, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash, X, Car, Settings, MapPin, Briefcase, Calendar, ChevronDown, Phone, Mail, Info } from 'lucide-react';
+
+const formatPrice = (price: any) => {
+  if (!price) return 'Contact Us';
+  const str = String(price).trim();
+  if (str.includes('$')) return str;
+  if (/^\d/.test(str)) {
+    return `$${str}`;
+  }
+  if (/^from\s+\d/i.test(str)) {
+    return str.replace(/^from\s+/i, 'From $');
+  }
+  if (/[0-9]/.test(str)) {
+    return `$${str}`;
+  }
+  return str;
+};
 
 const VehiclesPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -11,11 +27,29 @@ const VehiclesPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: '', type: 'Car', seats: '4', image: '', images: [] as string[], description: '', price: '', features: '', withGuide: true, ac: 'Yes', wifi: 'Free', insurance: 'Included' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    type: 'Car', 
+    seats: '4', 
+    image: '', 
+    images: [] as string[], 
+    description: '', 
+    price: '', 
+    features: '', 
+    withGuide: true, 
+    ac: 'Yes', 
+    wifi: 'Free', 
+    insurance: 'Included',
+    transmission: 'Automatic',
+    fuelType: 'Petrol',
+    luggage: '2 Large Bags',
+    engine: '1500 cc',
+    amenities: 'Air Conditioning, Free Wi-Fi, GPS Navigation, Luggage Storage, Cool Box, First Aid Kit'
+  });
   const [isUploading, setIsUploading] = useState(false);
 
   // FAQ state
-  const [openFaq, setOpenFaq] = useState<number | null>(1);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
     setIsAdmin(localStorage.getItem('isAdminLoggedIn') === 'true');
@@ -79,7 +113,8 @@ const VehiclesPage = () => {
         image: formData.images?.[0] || '',
         images: formData.images || [],
         seats: parseInt(formData.seats) || 4,
-        features: formData.features.split(',').map(f => f.trim()).filter(Boolean)
+        features: formData.features.split(',').map(f => f.trim()).filter(Boolean),
+        amenities: formData.amenities.split(',').map(a => a.trim()).filter(Boolean)
       };
       
       const url = editingVehicle ? `/api/vehicles/${editingVehicle.id}` : '/api/vehicles';
@@ -112,14 +147,19 @@ const VehiclesPage = () => {
       type: vehicle.type || 'Car',
       seats: vehicle.seats?.toString() || '4',
       image: vehicle.image || vehicle.images?.[0] || '',
-      images: vehicle.images || [],
+      images: vehicle.images && vehicle.images.length > 0 ? vehicle.images : (vehicle.image ? [vehicle.image] : []),
       description: vehicle.description || '',
       price: vehicle.price || '',
       features: Array.isArray(vehicle.features) ? vehicle.features.join(', ') : '',
       withGuide: vehicle.withGuide !== undefined ? vehicle.withGuide : true,
       ac: vehicle.ac || 'Yes',
       wifi: vehicle.wifi || 'Free',
-      insurance: vehicle.insurance || 'Included'
+      insurance: vehicle.insurance || 'Included',
+      transmission: vehicle.transmission || 'Automatic',
+      fuelType: vehicle.fuelType || 'Petrol',
+      luggage: vehicle.luggage || '2 Large Bags',
+      engine: vehicle.engine || '1500 cc',
+      amenities: Array.isArray(vehicle.amenities) ? vehicle.amenities.join(', ') : (typeof vehicle.amenities === 'string' ? vehicle.amenities : 'Air Conditioning, Free Wi-Fi, GPS Navigation, Luggage Storage, Cool Box, First Aid Kit')
     });
     setIsModalOpen(true);
   };
@@ -127,7 +167,6 @@ const VehiclesPage = () => {
   const handleDeleteClick = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this vehicle?')) return;
     try {
       const res = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -141,25 +180,37 @@ const VehiclesPage = () => {
   };
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.vehicle-reveal',
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }
-      );
-    });
-    return () => ctx.revert();
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.vehicle-reveal',
+          { y: 50, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }
+        );
+      });
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
   }, []);
 
   useLayoutEffect(() => {
     if (vehicles.length === 0) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo('.vehicle-card-item',
-        { y: 150, opacity: 0, rotateX: 25, z: -200, scale: 0.9 },
-        { y: 0, opacity: 1, rotateX: 0, z: 0, scale: 1, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: containerRef.current, start: 'top 85%', end: 'center center', scrub: 1.5 } }
-      );
-    }, containerRef);
-    return () => ctx.revert();
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo('.vehicle-card-item',
+          { y: 150, opacity: 0, rotateX: 25, z: -200, scale: 0.9 },
+          { y: 0, opacity: 1, rotateX: 0, z: 0, scale: 1, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: containerRef.current, start: 'top 85%', end: 'center center', scrub: 1.5 } }
+        );
+      }, containerRef);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
   }, [vehicles]);
 
   const toggleFaq = (index: number) => {
@@ -208,7 +259,7 @@ const VehiclesPage = () => {
                   <MapPin className="text-orange shrink-0" size={24} />
                   <div>
                     <h4 className="font-bold text-forest dark:text-[#fdfbf7] mb-1 drop-shadow-sm">Location:</h4>
-                    <p className="text-forest/80 dark:text-[#fdfbf7]/95 font-light dark:font-normal">Available across Sri Lanka, including Seeduwa</p>
+                    <p className="text-forest/80 dark:text-[#fdfbf7]/95 font-light dark:font-normal">Available across Sri Lanka, including Bentota</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -265,7 +316,7 @@ const VehiclesPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 bg-white/40 dark:bg-[#0a0f0d]/60 backdrop-blur-md p-8 md:p-10 rounded-[2rem] shadow-xl border border-white/20 dark:border-white/5">
               <h2 className="text-4xl md:text-5xl font-serif text-forest dark:text-[#fdfbf7] drop-shadow-sm m-0">Fleet Portfolio</h2>
               {isAdmin && (
-                <button onClick={() => { setEditingVehicle(null); setFormData({ name: '', type: 'Car', seats: '4', image: '', images: [], description: '', price: '', features: '', withGuide: true, ac: 'Yes', wifi: 'Free', insurance: 'Included' }); setIsModalOpen(true); }} className="flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-orange/90 transition-colors shadow-lg">
+                <button onClick={() => { setEditingVehicle(null); setFormData({ name: '', type: 'Car', seats: '4', image: '', images: [], description: '', price: '', features: '', withGuide: true, ac: 'Yes', wifi: 'Free', insurance: 'Included', transmission: 'Automatic', fuelType: 'Petrol', luggage: '2 Large Bags', engine: '1500 cc', amenities: 'Air Conditioning, Free Wi-Fi, GPS Navigation, Luggage Storage, Cool Box, First Aid Kit' }); setIsModalOpen(true); }} className="flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-orange/90 transition-colors shadow-lg">
                   <Plus size={18} /> <span className="font-bold text-sm tracking-widest uppercase">Add Vehicle</span>
                 </button>
               )}
@@ -273,47 +324,69 @@ const VehiclesPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {vehicles.map((vehicle, idx) => (
-              <Link key={vehicle.id || idx} to={`/vehicles/${vehicle.id}`} className="vehicle-card-item group relative h-[500px] rounded-2xl overflow-hidden block cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10">
+              <div 
+                key={vehicle.id || idx} 
+                onClick={() => navigate(`/vehicles/${vehicle.id || vehicle.name.toLowerCase().replace(/\\s+/g, '-')}`)}
+                className="vehicle-card-item group relative h-[600px] rounded-2xl overflow-hidden block cursor-pointer shadow-lg hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition-shadow duration-500 bg-forest/5 dark:bg-[#fdfbf7]/5 border border-forest/10 dark:border-[#fdfbf7]/10 transform-gpu"
+              >
                 {isAdmin && (
                   <div className="absolute top-4 left-4 z-30 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button onClick={(e) => handleEditClick(e, vehicle)} className="bg-white/90 text-forest p-2 rounded-full hover:bg-orange hover:text-[#fdfbf7] transition-colors">
+                    <button onClick={(e) => handleEditClick(e, vehicle)} className="bg-white/90 text-forest p-2 rounded-full hover:bg-orange hover:text-[#fdfbf7] transition-colors shadow-lg">
                       <Edit size={16} />
                     </button>
-                    <button onClick={(e) => handleDeleteClick(e, vehicle.id)} className="bg-white/90 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-[#fdfbf7] transition-colors">
+                    <button onClick={(e) => handleDeleteClick(e, vehicle.id)} className="bg-white/90 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-[#fdfbf7] transition-colors shadow-lg">
                       <Trash size={16} />
                     </button>
                   </div>
                 )}
                 
-                <img src={vehicle.images?.[0] || vehicle.image} alt={vehicle.name} className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform duration-1000 ease-out" />
-                
-                <div className="absolute top-4 right-4 bg-white/90 dark:bg-[#0a0f0d]/90 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] z-20">
-                  {vehicle.type}
+                {/* Parallax clip container */}
+                <div className="absolute inset-0 z-0">
+                  {/* Full image */}
+                  <img 
+                    src={vehicle.images?.[0] || vehicle.image || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1400'} 
+                    alt={vehicle.name} 
+                    className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform duration-1000 ease-out" 
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
                 </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
-                
-                <div className="absolute bottom-0 left-0 w-full p-8 bg-white/5 border-t border-white/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <h3 className="text-3xl font-serif text-[#fdfbf7] mb-2 drop-shadow-lg">{vehicle.name}</h3>
-                  <div className="flex items-center gap-4 text-[#fdfbf7]/95 text-sm mb-3 font-medium tracking-wide drop-shadow-md">
-                     <span className="flex items-center gap-1"><Settings size={14} /> Auto/Manual</span>
-                     <span className="flex items-center gap-1"><Car size={14} /> {vehicle.seats} Seats</span>
+                {/* Type badge */}
+                <div className="absolute top-5 right-5 bg-[#fdfbf7]/90 dark:bg-[#0a0f0d]/90 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] shadow-lg z-20 border border-forest/5 dark:border-[#fdfbf7]/10">
+                  {vehicle.type || 'Car'}
+                </div>
+
+                {/* Bottom content */}
+                <div className="absolute bottom-0 left-0 w-full p-8 backdrop-blur-md bg-black/30 border-t border-white/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-20">
+                  {/* Specs pills */}
+                  <div className="flex gap-3 mb-4">
+                    <span className="flex items-center gap-1.5 text-[#fdfbf7]/90 text-xs font-bold tracking-wider drop-shadow-md">
+                      <Settings size={13} className="text-orange" /> Auto/Manual
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[#fdfbf7]/90 text-xs font-bold tracking-wider drop-shadow-md">
+                      <Car size={13} className="text-orange" /> {vehicle.seats || 4} Seats
+                    </span>
                   </div>
-                  {vehicle.withGuide !== false && (
-                    <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-orange flex items-center gap-1 drop-shadow-sm">
-                       <Briefcase size={12} /> Includes Chauffeur Guide
-                    </div>
-                  )}
+
+                  <h3 className="text-4xl font-serif text-[#fdfbf7] mb-2 drop-shadow-md">{vehicle.name}</h3>
                   
+                  {vehicle.withGuide !== false && (
+                    <p className="text-[#fdfbf7]/80 font-medium text-sm uppercase tracking-widest flex items-center gap-1.5">
+                      <Briefcase size={13} className="text-orange" /> Chauffeur Guide
+                    </p>
+                  )}
+
+                  {/* Hover-reveal row */}
                   <div className="mt-6 overflow-hidden h-0 group-hover:h-12 transition-all duration-500 flex items-center justify-between">
-                     <p className="text-orange font-bold text-xl drop-shadow-md">{vehicle.price}</p>
-                     <span className="text-sm font-bold tracking-widest uppercase text-[#fdfbf7] hover:text-orange transition-colors flex items-center gap-2 drop-shadow-md">
-                       View Details
-                       <div className="w-6 h-px bg-current"></div>
-                     </span>
+                    <span className="text-orange font-bold text-xl drop-shadow-md">{formatPrice(vehicle.price)}</span>
+                    <span className="text-sm font-semibold tracking-widest uppercase text-[#fdfbf7] hover:text-orange transition-colors flex items-center gap-2">
+                      View Details
+                      <div className="w-6 h-px bg-current"></div>
+                    </span>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
       </div>
@@ -352,15 +425,15 @@ const VehiclesPage = () => {
                   Experience hassle-free transportation with our rent-a-car service. Rent a vehicle with a chauffeur for a specified period, whether for a day, week, or month. Our range includes cars, vans, coaches and luxury cars or SUVs.
                 </p>
                 <p className="text-lg opacity-100 mb-12 font-medium drop-shadow-md text-[#fdfbf7]/95">
-                  To book one of our vehicles, please contact our transportation department via <a href="mailto:hello@reisenova.com" className="text-orange hover:underline font-bold drop-shadow-sm">email</a>.
+                  To book one of our vehicles, please contact our transportation department via <a href="mailto:reisenovatravels@gmail.com" className="text-orange hover:underline font-bold drop-shadow-sm">email</a>.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
                    <Link to="/plan-trip" className="bg-orange text-[#fdfbf7] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#fdfbf7] hover:text-black transition-colors shadow-lg shadow-orange/20">
                      Book Now
                    </Link>
                    <div className="flex flex-col text-sm opacity-90 text-left gap-1">
-                     <span className="flex items-center gap-2"><Phone size={16} className="text-orange"/> +94 76 001 0784 / +94 77 124 0693</span>
-                     <span className="flex items-center gap-2"><Mail size={16} className="text-orange"/> hello@reisenova.com</span>
+                     <span className="flex items-center gap-2"><Phone size={16} className="text-orange"/> +94 713850594</span>
+                     <span className="flex items-center gap-2"><Mail size={16} className="text-orange"/> reisenovatravels@gmail.com</span>
                    </div>
                 </div>
               </div>
@@ -404,78 +477,114 @@ const VehiclesPage = () => {
     {isModalOpen && (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setIsModalOpen(false)}>
         <div className="bg-[#fdfbf7] dark:bg-[#121915] text-forest dark:text-[#fdfbf7] p-8 rounded-2xl w-full max-w-2xl shadow-2xl relative" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 transition-colors">
+          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 transition-colors z-10">
             <X size={24} />
           </button>
           
-          <h2 className="text-3xl font-serif mb-6">{editingVehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
+          <h2 className="text-3xl font-serif mb-2 text-forest dark:text-[#fdfbf7]">{editingVehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h2>
+          <p className="text-sm opacity-60 mb-6 font-light">Enter or modify specifications, details, and features of the vehicle.</p>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Name</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" />
-              </div>
-              <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Type (Car, Van, Bus, Bike)</label>
-                <input required type="text" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" />
-              </div>
-            </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-h-[70vh] overflow-y-auto pr-3 custom-scrollbar" data-lenis-prevent>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Seats</label>
-                <input required type="number" value={formData.seats} onChange={e => setFormData({...formData, seats: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" />
-              </div>
-              <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Price (e.g. $50 / day)</label>
-                <input required type="text" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" />
+            {/* Recommendation info banner */}
+            <div className="bg-[#fff9e6] dark:bg-[#1f1a10] border border-[#ffb74d] text-[#e65100] dark:text-[#ffb74d] p-3.5 rounded-xl flex items-start gap-3 text-xs">
+              <Info className="shrink-0 mt-0.5 text-orange" size={18} />
+              <div className="font-medium space-y-1">
+                <p className="font-bold">Recommended Image Dimensions:</p>
+                <p className="opacity-90">• 1200 x 600 pixels (or any 2:1 landscape image ratio) is recommended for perfect crop-free banner representation.</p>
               </div>
             </div>
 
-            <div>
-              <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Description</label>
-              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange min-h-[80px]" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Name</label>
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Type (Car, Van, Bus, SUV, Bike)</label>
+                <input required type="text" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" />
+              </div>
             </div>
             
-            <div>
-              <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Features (comma separated)</label>
-              <input type="text" value={formData.features} onChange={e => setFormData({...formData, features: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" placeholder="AC, Bluetooth, GPS..." />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Seats</label>
+                <input required type="number" value={formData.seats} onChange={e => setFormData({...formData, seats: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Price (e.g. $50 / day)</label>
+                <input required type="text" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Transmission</label>
+                <input required type="text" value={formData.transmission} onChange={e => setFormData({...formData, transmission: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="Automatic / Manual" />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Wi-Fi</label>
-                <input type="text" value={formData.wifi} onChange={e => setFormData({...formData, wifi: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" placeholder="e.g. Free" />
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Fuel Type</label>
+                <input type="text" value={formData.fuelType} onChange={e => setFormData({...formData, fuelType: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="Petrol / Diesel" />
               </div>
               <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Air Conditioning</label>
-                <input type="text" value={formData.ac} onChange={e => setFormData({...formData, ac: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" placeholder="e.g. Yes" />
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Luggage Capacity</label>
+                <input type="text" value={formData.luggage} onChange={e => setFormData({...formData, luggage: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="e.g. 2 Large Bags" />
               </div>
               <div>
-                <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Insurance</label>
-                <input type="text" value={formData.insurance} onChange={e => setFormData({...formData, insurance: e.target.value})} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-3 outline-none focus:border-orange" placeholder="e.g. Included" />
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Engine Capacity</label>
+                <input type="text" value={formData.engine} onChange={e => setFormData({...formData, engine: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="e.g. 1500 cc" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Upload Images (Max 10)</label>
+              <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Description</label>
+              <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7] min-h-[100px]" />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Key Highlights (comma separated)</label>
+                <input type="text" value={formData.features} onChange={e => setFormData({...formData, features: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="AC, Bluetooth, GPS..." />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Amenities Included (comma separated)</label>
+                <input type="text" value={formData.amenities} onChange={e => setFormData({...formData, amenities: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="Air Conditioning, Free Wi-Fi..." />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Wi-Fi Status</label>
+                <input type="text" value={formData.wifi} onChange={e => setFormData({...formData, wifi: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="e.g. Free" />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Air Conditioning Status</label>
+                <input type="text" value={formData.ac} onChange={e => setFormData({...formData, ac: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="e.g. Yes" />
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block">Insurance Coverage</label>
+                <input type="text" value={formData.insurance} onChange={e => setFormData({...formData, insurance: e.target.value})} className="w-full bg-white/25 dark:bg-black/25 border border-forest/20 dark:border-[#fdfbf7]/10 rounded-xl p-3 outline-none focus:border-orange text-forest dark:text-[#fdfbf7]" placeholder="e.g. Included" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs uppercase tracking-widest font-bold opacity-80 mb-2 block font-bold">Upload Images (Max 10)</label>
               <div className="flex gap-4 items-center">
-                <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="w-full bg-transparent border border-forest/20 dark:border-[#fdfbf7]/20 rounded-lg p-2 outline-none focus:border-orange file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-orange/10 file:text-orange hover:file:bg-orange/20" />
+                <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="w-full bg-white/10 border border-forest/15 dark:border-[#fdfbf7]/10 rounded-xl p-2.5 outline-none focus:border-orange file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-orange/15 file:text-orange hover:file:bg-orange/25 file:cursor-pointer" />
                 {isUploading && <span className="text-xs text-orange animate-pulse">Uploading...</span>}
               </div>
               
               {formData.images && formData.images.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="mt-4 grid grid-cols-3 md:grid-cols-5 gap-4">
                   {formData.images.map((imgUrl, idx) => (
-                    <div key={idx} className="relative group rounded-lg overflow-hidden border border-forest/20 dark:border-[#fdfbf7]/20">
-                      <img src={imgUrl} alt={`Preview ${idx}`} className="w-full h-24 object-cover" />
+                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-forest/20 dark:border-[#fdfbf7]/20 aspect-video shadow-md">
+                      <img src={imgUrl} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                       <button 
                         type="button"
                         onClick={() => removeImage(idx)}
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-500/95 text-white p-1 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm"
                       >
-                        <X size={14} />
+                        <X size={12} />
                       </button>
                     </div>
                   ))}
@@ -483,12 +592,12 @@ const VehiclesPage = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-2 mt-2">
-              <input type="checkbox" id="withGuide" checked={formData.withGuide} onChange={e => setFormData({...formData, withGuide: e.target.checked})} className="accent-orange w-4 h-4" />
-              <label htmlFor="withGuide" className="text-sm font-bold opacity-80">Includes Chauffeur Guide</label>
+            <div className="flex items-center gap-3 bg-white/10 p-3.5 rounded-xl border border-forest/5">
+              <input type="checkbox" id="withGuide" checked={formData.withGuide} onChange={e => setFormData({...formData, withGuide: e.target.checked})} className="accent-orange w-4 h-4 cursor-pointer" />
+              <label htmlFor="withGuide" className="text-sm font-bold opacity-90 cursor-pointer">Includes Chauffeur Guide service as standard</label>
             </div>
 
-            <button type="submit" className="mt-4 bg-orange text-white py-4 rounded-xl font-bold tracking-widest uppercase text-sm hover:bg-orange/90 transition-colors">
+            <button type="submit" className="mt-4 bg-orange text-white py-4 rounded-xl font-bold tracking-widest uppercase text-sm hover:bg-orange/90 transition-all shadow-md">
               {editingVehicle ? 'Save Changes' : 'Add Vehicle'}
             </button>
           </form>

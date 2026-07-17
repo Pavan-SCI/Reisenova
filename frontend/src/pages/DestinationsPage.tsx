@@ -82,48 +82,32 @@ const DestinationsPage = () => {
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.dest-reveal',
-        { y: 50, opacity: 0 },
-        {
-          y: 0, opacity: 1,
-          stagger: 0.1,
-          duration: 1,
-          ease: 'power3.out',
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  useLayoutEffect(() => {
-    if (destinations.length === 0) return;
-    const ctx = gsap.context(() => {
-      cardsRef.current.forEach((card: any) => {
-        if (!card) return;
-        gsap.fromTo(card, 
-          { y: 100, opacity: 0, },
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.dest-reveal',
+          { y: 50, opacity: 0 },
           {
-            y: 0, opacity: 1, 
-            duration: 0.8,
+            y: 0, opacity: 1,
+            stagger: 0.1,
+            duration: 1,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-            }
           }
         );
       });
-    }, containerRef);
-    return () => ctx.revert();
-  }, [destinations]);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
     const card = cardsRef.current[idx];
     if (!card) return;
     
-    const rect = card.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
@@ -142,13 +126,15 @@ const DestinationsPage = () => {
     });
     
     const img = card.querySelector('img');
-    gsap.to(img, {
-      x: ((x - centerX) / centerX) * -15,
-      y: ((y - centerY) / centerY) * -15,
-      scale: 1.15,
-      duration: 0.5,
-      ease: 'power2.out',
-    });
+    if (img) {
+      gsap.to(img, {
+        x: ((x - centerX) / centerX) * -15,
+        y: ((y - centerY) / centerY) * -15,
+        scale: 1.15,
+        duration: 0.5,
+        ease: 'power2.out',
+      });
+    }
   };
 
   const handleMouseLeave = (idx: number) => {
@@ -156,21 +142,22 @@ const DestinationsPage = () => {
     if (!card) return;
     
     gsap.to(card, {
-      
       rotateX: 0,
       rotateY: 0,
-      ease: 'elastic.out(1, 0.5)',
-      duration: 1.5,
+      ease: 'power3.out',
+      duration: 0.8,
     });
     
     const img = card.querySelector('img');
-    gsap.to(img, {
-      x: 0,
-      y: 0, opacity: 1,
-      scale: 1,
-      duration: 1.5,
-      ease: 'power3.out',
-    });
+    if (img) {
+      gsap.to(img, {
+        x: 0,
+        y: 0,
+        scale: 1,
+        duration: 1.5,
+        ease: 'power3.out',
+      });
+    }
   };
 
   const handleEditClick = (e: React.MouseEvent, dest: any) => {
@@ -262,7 +249,7 @@ const DestinationsPage = () => {
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10">
         
-        <div className="mb-16 md:mb-20 dest-reveal text-center max-w-3xl mx-auto">
+        <div className="mb-16 md:mb-20 dest-reveal text-center max-w-3xl mx-auto opacity-0">
           <p className="text-orange uppercase tracking-[0.4em] text-sm font-semibold mb-6">Iconic Locations</p>
           <h2 className="text-5xl md:text-7xl font-serif mb-6 leading-tight drop-shadow-sm text-forest dark:text-[#fdfbf7]">
             Explore <span className="italic text-orange font-light">Destinations</span>
@@ -286,44 +273,49 @@ const DestinationsPage = () => {
           {destinations.map((dest, index) => (
             <div 
               key={dest.name + index}
-              ref={el => cardsRef.current[index] = el}
               onMouseMove={(e) => handleMouseMove(e, index)}
               onMouseLeave={() => handleMouseLeave(index)}
               onClick={() => navigate(`/destinations/${dest.id || dest.name.toLowerCase()}`)}
-              className="group relative h-[550px] overflow-hidden rounded-2xl cursor-pointer shadow-xl hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] transition-shadow duration-500 bg-[#fdfbf7] dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10"
+              className="group relative h-[550px] cursor-pointer"
+              style={{ perspective: '1200px' }}
             >
-              <div className="absolute top-4 right-4 bg-white/90 dark:bg-[#0a0f0d]/90 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] z-30 shadow-sm">
-                {dest.category}
-              </div>
-
-              {isAdmin && (
-                <div className="absolute top-4 left-4 flex gap-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button onClick={(e) => handleEditClick(e, dest)} className="bg-white/90 text-forest p-2 rounded-full hover:bg-orange hover:text-white transition-colors">
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={(e) => handleDeleteClick(e, dest.id)} className="bg-white/90 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-white transition-colors">
-                    <Trash size={16} />
-                  </button>
+              <div
+                ref={el => { cardsRef.current[index] = el; }}
+                className="dest-card-inner relative w-full h-full overflow-hidden rounded-2xl shadow-xl hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] transition-shadow duration-500 bg-[#fdfbf7] dark:bg-[#0a0f0d] border border-forest/10 dark:border-white/10"
+              >
+                <div className="absolute top-4 right-4 bg-white/90 dark:bg-[#0a0f0d]/90 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase text-forest dark:text-[#fdfbf7] z-30 shadow-sm pointer-events-none">
+                  {dest.category}
                 </div>
-              )}
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
-              
-              <img 
-                src={dest.img} 
-                alt={dest.name} 
-                className="w-[115%] max-w-none h-[115%] -left-[7.5%] -top-[7.5%] absolute object-cover pointer-events-none"
-              />
-              
-              <div className="absolute bottom-0 left-0 p-8 z-20 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 ">
-                <h3 className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg">{dest.name}</h3>
-                <p className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{dest.desc}</p>
+
+                {isAdmin && (
+                  <div className="absolute top-4 left-4 flex gap-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto">
+                    <button onClick={(e) => handleEditClick(e, dest)} className="bg-white/90 text-forest p-2 rounded-full hover:bg-orange hover:text-white transition-colors cursor-pointer">
+                      <Edit size={16} />
+                    </button>
+                    <button onClick={(e) => handleDeleteClick(e, dest.id)} className="bg-white/90 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-white transition-colors cursor-pointer">
+                      <Trash size={16} />
+                    </button>
+                  </div>
+                )}
                 
-                <div className="mt-6 overflow-hidden h-0 group-hover:h-10 transition-all duration-500 flex items-center">
-                  <Link to="/plan-trip" onClick={handleBookClick} className="text-sm font-semibold tracking-widest uppercase text-[#fdfbf7] hover:text-orange transition-colors flex items-center gap-2">
-                    Include in Trip
-                    <div className="w-6 h-px bg-current"></div>
-                  </Link>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity duration-500 pointer-events-none" />
+                
+                <img 
+                  src={dest.img} 
+                  alt={dest.name} 
+                  className="w-[115%] max-w-none h-[115%] -left-[7.5%] -top-[7.5%] absolute object-cover pointer-events-none"
+                />
+                
+                <div className="absolute bottom-0 left-0 p-8 z-20 translate-y-6 group-hover:translate-y-0 transition-transform duration-500 pointer-events-none">
+                  <h3 className="text-4xl font-serif text-[#fdfbf7] mb-3 drop-shadow-lg pointer-events-none">{dest.name}</h3>
+                  <p className="text-[#fdfbf7]/90 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none">{dest.desc}</p>
+                  
+                  <div className="mt-6 overflow-hidden h-0 group-hover:h-10 transition-all duration-500 flex items-center pointer-events-auto">
+                    <Link to="/plan-trip" onClick={handleBookClick} className="text-sm font-semibold tracking-widest uppercase text-[#fdfbf7] hover:text-orange transition-colors flex items-center gap-2 cursor-pointer">
+                      Include in Trip
+                      <div className="w-6 h-px bg-current"></div>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,13 +329,13 @@ const DestinationsPage = () => {
     {isModalOpen && (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setIsModalOpen(false)}>
         <div className="bg-[#fdfbf7] dark:bg-[#121915] text-forest dark:text-[#fdfbf7] p-8 rounded-2xl w-full max-w-2xl shadow-2xl relative" onClick={e => e.stopPropagation()}>
-          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors">
+          <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 opacity-50 hover:opacity-100 hover:text-orange transition-colors z-10">
             <X size={24} />
           </button>
           
           <h2 className="text-3xl font-serif mb-6">{editingDest ? 'Edit Destination' : 'Add New Destination'}</h2>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar" data-lenis-prevent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="text-xs uppercase tracking-widest opacity-70 mb-2 block">Name</label>

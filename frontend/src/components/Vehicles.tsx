@@ -3,6 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowRight, Car, Settings, Briefcase } from 'lucide-react';
 
+const formatPrice = (price: any) => {
+  if (!price) return 'Contact Us';
+  const str = String(price).trim();
+  if (str.includes('$')) return str;
+  if (/^\d/.test(str)) {
+    return `$${str}`;
+  }
+  if (/^from\s+\d/i.test(str)) {
+    return str.replace(/^from\s+/i, 'From $');
+  }
+  if (/[0-9]/.test(str)) {
+    return `$${str}`;
+  }
+  return str;
+};
+
 const Vehicles = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -71,10 +87,10 @@ const Vehicles = () => {
                 key={vehicle.id || idx} 
                 ref={el => cardsRef.current[idx] = el}
                 onClick={() => navigate(`/vehicles/${vehicle.id || vehicle.name.toLowerCase().replace(/\s+/g, '-')}`)}
-                className="group relative h-[600px] rounded-2xl cursor-pointer shadow-lg hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition-shadow duration-500 bg-[#fdfbf7]/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-[#fdfbf7]/10"
+                className="group relative h-[600px] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition-shadow duration-500 bg-forest/5 dark:bg-[#fdfbf7]/5 border border-forest/10 dark:border-[#fdfbf7]/10 transform-gpu"
               >
                 {/* Parallax clip container */}
-                <div className="vehicle-img-container absolute inset-0 rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 z-0">
                   {/* Full image */}
                   <img 
                     src={vehicle.images?.[0] || vehicle.image || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1400'} 
@@ -82,7 +98,7 @@ const Vehicles = () => {
                     className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform duration-1000 ease-out" 
                   />
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
                 </div>
 
                 {/* Type badge */}
@@ -91,7 +107,7 @@ const Vehicles = () => {
                 </div>
 
                 {/* Bottom content */}
-                <div className="absolute bottom-0 left-0 w-full p-8 backdrop-blur-md bg-[#fdfbf7]/5 border-t border-[#fdfbf7]/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <div className="absolute bottom-0 left-0 w-full p-8 backdrop-blur-md bg-black/30 border-t border-white/10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-20">
                   {/* Specs pills */}
                   <div className="flex gap-3 mb-4">
                     <span className="flex items-center gap-1.5 text-[#fdfbf7]/90 text-xs font-bold tracking-wider drop-shadow-md">
@@ -112,7 +128,7 @@ const Vehicles = () => {
 
                   {/* Hover-reveal row */}
                   <div className="mt-6 overflow-hidden h-0 group-hover:h-12 transition-all duration-500 flex items-center justify-between">
-                    <span className="text-orange font-bold text-xl drop-shadow-md">{vehicle.price || 'Contact Us'}</span>
+                    <span className="text-orange font-bold text-xl drop-shadow-md">{formatPrice(vehicle.price)}</span>
                     <span className="text-sm font-semibold tracking-widest uppercase text-[#fdfbf7] hover:text-orange transition-colors flex items-center gap-2">
                       View Details
                       <div className="w-6 h-px bg-current"></div>

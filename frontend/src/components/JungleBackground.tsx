@@ -1,7 +1,7 @@
-import React, { useLayoutEffect, useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Bird } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,24 +9,269 @@ const HabaralaLeaf = ({ className }: { className?: string }) => (
   <img src="/leaf.png" alt="" className={`object-cover object-top ${className}`} draggable={false} />
 );
 
-const MonkeySilhouette = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M50,30 C60,20 70,30 75,40 C80,50 70,70 60,70 C50,70 40,60 40,50 C40,40 45,35 50,30 Z" />
-    <path d="M70,45 C80,40 90,30 95,20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
-    <path d="M60,70 C65,80 75,90 85,95" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
-    <path d="M40,50 C30,60 20,70 10,65 C0,60 10,40 20,30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none" />
-    <circle cx="55" cy="40" r="10" />
-  </svg>
+const DynamicLeaf = ({ 
+  className, 
+  rotation, 
+  imgUrl, 
+  scale, 
+  x, 
+  y, 
+  alt 
+}: { 
+  className?: string; 
+  rotation: number; 
+  imgUrl: string; 
+  scale: number; 
+  x: number; 
+  y: number; 
+  alt: string; 
+}) => (
+  <div 
+    className={`${className} overflow-hidden`}
+    style={{
+      WebkitMaskImage: 'url("/leaf.png")',
+      maskImage: 'url("/leaf.png")',
+      WebkitMaskSize: 'cover',
+      maskSize: 'cover',
+      WebkitMaskPosition: 'top',
+      maskPosition: 'top',
+      WebkitMaskRepeat: 'no-repeat',
+      maskRepeat: 'no-repeat',
+    }}
+  >
+    {/* Inner container counter-rotated to align with screen coordinates */}
+    <div 
+      className="absolute inset-0 w-full h-full"
+      style={{
+        transform: `rotate(${-rotation}deg)`,
+      }}
+    >
+      {/* Photo background centered and scaled perfectly */}
+      <img 
+        src={imgUrl} 
+        alt={alt} 
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          transform: `scale(${scale}) translate(${x}%, ${y}%)`,
+        }}
+        draggable={false} 
+        referrerPolicy="no-referrer"
+      />
+    </div>
+
+    {/* Semi-transparent leaf texture on top to keep veins and leaf details visible */}
+    <img 
+      src="/leaf.png" 
+      alt="" 
+      className="absolute inset-0 w-full h-full object-cover object-top opacity-30 dark:opacity-45 mix-blend-overlay pointer-events-none"
+      draggable={false} 
+    />
+  </div>
 );
 
+const SigiriyaLeaf = ({ className, rotation, config }: { className?: string; rotation: number; config?: { imgUrl: string; scale: number; x: number; y: number } }) => (
+  <DynamicLeaf
+    className={className}
+    rotation={rotation}
+    imgUrl={config?.imgUrl || "/sigiriya_uploaded.png"}
+    scale={config?.scale ?? 1.8}
+    x={config?.x ?? 12}
+    y={config?.y ?? 10}
+    alt="Sigiriya"
+  />
+);
+
+const DaladaMaligawaLeaf = ({ className, rotation, config }: { className?: string; rotation: number; config?: { imgUrl: string; scale: number; x: number; y: number } }) => (
+  <DynamicLeaf
+    className={className}
+    rotation={rotation}
+    imgUrl={config?.imgUrl || "/dalada_maligawa.jpg"}
+    scale={config?.scale ?? 1.7}
+    x={config?.x ?? 12}
+    y={config?.y ?? 0}
+    alt="Dalada Maligawa"
+  />
+);
+
+const GalleLighthouseLeaf = ({ className, rotation, config }: { className?: string; rotation: number; config?: { imgUrl: string; scale: number; x: number; y: number } }) => (
+  <DynamicLeaf
+    className={className}
+    rotation={rotation}
+    imgUrl={config?.imgUrl || "/galle_lighthouse.jpg"}
+    scale={config?.scale ?? 1.8}
+    x={config?.x ?? 5}
+    y={config?.y ?? -10}
+    alt="Galle Lighthouse"
+  />
+);
+
+const DambullaCaveTempleLeaf = ({ className, rotation, config }: { className?: string; rotation: number; config?: { imgUrl: string; scale: number; x: number; y: number } }) => (
+  <DynamicLeaf
+    className={className}
+    rotation={rotation}
+    imgUrl={config?.imgUrl || "/dambulla_cave_temple.jpg"}
+    scale={config?.scale ?? 1.8}
+    x={config?.x ?? 5}
+    y={config?.y ?? 0}
+    alt="Dambulla Cave Temple"
+  />
+);
+
+const GlassPalmTreeBadge = ({ className, isDark }: { className?: string; isDark: boolean }) => {
+  const strokeColor = isDark ? "white" : "black";
+  const fillStyle = isDark ? "white" : "black";
+
+  return (
+    <div className={`relative flex items-center justify-center ${className}`}>
+      {/* Badge Content */}
+      <div className="w-full h-full flex flex-col items-center justify-center relative">
+        <svg
+          viewBox="0 0 75 75"
+          className={`w-full h-full ${isDark ? 'text-white' : 'text-black'} drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* 1. Large orange-red sun circle behind the trees with glowing effect */}
+          <circle 
+            cx="34" 
+            cy="52" 
+            r="13" 
+            fill="#f15a24" 
+            fillOpacity="0.8"
+            className="filter drop-shadow-[0_0_8px_#f15a24]"
+          />
+
+          <g>
+            {/* 2. Left Palm Tree */}
+            <path 
+              d="M 28 65 Q 26 50 18 44 Q 21 50 29 65 Z" 
+              fill="currentColor" 
+              fillOpacity="0.5"
+              stroke={strokeColor}
+              strokeWidth="0.5"
+            />
+            <path d="M 18 44 Q 10 40 4 46 C 10 45 14 44 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 18 44 Q 8 46 3 54 C 9 51 14 48 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 18 44 Q 22 36 28 38 C 24 40 21 42 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 18 44 Q 24 44 28 50 C 23 48 20 46 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 18 44 Q 12 50 8 56 C 12 52 15 48 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 18 44 Q 16 34 14 28 C 16 34 17 39 18 44" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+
+            {/* 3. Right Palm Tree */}
+            <path 
+              d="M 39 65 Q 36 46 47 33 Q 39 44 40 65 Z" 
+              fill="currentColor" 
+              fillOpacity="0.5"
+              stroke={strokeColor}
+              strokeWidth="0.5"
+            />
+            <path d="M 47 33 Q 45 21 42 14 C 45 21 46 27 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 37 27 29 33 C 37 32 42 32 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 35 35 28 43 C 36 39 42 36 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 57 25 65 30 C 57 30 52 31 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 59 34 67 42 C 58 38 52 35 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 56 43 61 51 C 54 45 50 39 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+            <path d="M 47 33 Q 41 41 36 48 C 41 41 44 37 47 33" fill="currentColor" fillOpacity="0.7" stroke={strokeColor} strokeWidth="0.3" />
+
+            {/* 4. Grassy Island Base & Shrubbery */}
+            <path 
+              d="M 12 65 Q 28 62 48 65 Q 40 63 12 65" 
+              fill="currentColor" 
+              fillOpacity="0.8"
+              stroke={strokeColor}
+              strokeWidth="0.5"
+            />
+            <path 
+              d="M 18 65 L 17 60 L 19 65 L 21 58 L 22 65 L 25 59 L 26 65 L 29 58 L 31 65 L 34 61 L 35 65 L 38 58 L 39 65" 
+              stroke={strokeColor} 
+              strokeWidth="0.8" 
+              strokeLinecap="round" 
+              fill={fillStyle} 
+            />
+            <path 
+              d="M 40 65 L 41 61 L 43 65 L 44 59 L 45 65" 
+              stroke={strokeColor} 
+              strokeWidth="0.8" 
+              strokeLinecap="round" 
+              fill={fillStyle} 
+            />
+
+            {/* 5. Elegant Water Waves Rippling below island */}
+            <path 
+              d="M 10 68 C 18 67, 22 69, 30 68 C 38 67, 42 69, 50 68" 
+              fill="none" 
+              stroke={strokeColor} 
+              strokeWidth="1" 
+              strokeLinecap="round" 
+              strokeOpacity="0.8"
+            />
+            <path 
+              d="M 15 71 C 21 70, 25 72, 31 71 C 37 70, 41 72, 45 71" 
+              fill="none" 
+              stroke={strokeColor} 
+              strokeWidth="0.8" 
+              strokeLinecap="round" 
+              strokeOpacity="0.6"
+            />
+          </g>
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 const JungleBackground = () => {
+  const location = useLocation();
+  const isDetailsPage = /^\/(destinations|hotels|packages|vehicles)\/[^/]+$/.test(location.pathname);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLImageElement>(null);
+  const [isDark, setIsDark] = useState(false);
+  const [leavesConfig, setLeavesConfig] = useState<any>({
+    topLeft: { imgUrl: "/sigiriya_uploaded.png", scale: 1.8, x: 12, y: 10 },
+    topRight: { imgUrl: "/dambulla_cave_temple.jpg", scale: 1.8, x: 5, y: 0 },
+    bottomLeft: { imgUrl: "/galle_lighthouse.jpg", scale: 1.8, x: 5, y: -10 },
+    bottomRight: { imgUrl: "/dalada_maligawa.jpg", scale: 1.7, x: 12, y: 0 }
+  });
+
+  useEffect(() => {
+    const checkDark = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const fetchSettings = () => {
+      fetch('/api/settings')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.leaves) {
+            setLeavesConfig(prev => ({
+              ...prev,
+              ...data.leaves
+            }));
+          }
+        })
+        .catch(console.error);
+    };
+
+    fetchSettings();
+
+    window.addEventListener('leaf-settings-updated', fetchSettings);
+    return () => {
+      window.removeEventListener('leaf-settings-updated', fetchSettings);
+    };
+  }, []);
 
   useLayoutEffect(() => {
+    let ctx: gsap.Context;
     // Wait a tick to make sure the body has height
     const timer = setTimeout(() => {
-      const ctx = gsap.context(() => {
+      ctx = gsap.context(() => {
         // 1. Background image zooms in continuously to give the feeling of moving forward
         gsap.to(bgRef.current, {
           scale: 2.5,
@@ -104,45 +349,52 @@ const JungleBackground = () => {
           }
         });
 
-        // Monkey appearing and swinging across smoothly
-        gsap.fromTo('.global-monkey', 
-          { x: '100vw', y: -50, rotate: -30,  scale: 1, opacity: 1 },
+        // Glass palm tree badge appearing and swinging across smoothly
+        gsap.fromTo('.global-glass-badge', 
+          { x: '100vw', y: '10vh', rotate: -45, scale: 0.6, opacity: 0 },
           {
-            x: '-40vw', 
-            y: 400, 
-            rotate: 30, 
+            x: '25vw', 
+            y: '45vh', 
+            rotate: 0, 
             opacity: 1,
-            scale: 2.5,
+            scale: 2.2,
             ease: 'sine.inOut',
             scrollTrigger: {
               trigger: document.body,
               start: '5% top',
-              end: '35% top',
+              end: '38% top',
               scrub: 2,
             }
           }
         );
 
-        // Birds appearing around 40-50% scroll
-        gsap.fromTo('.global-bird-1',
-          { x: '-20vw', y: 300, scale: 0.2, z: -500, opacity: 1 },
-          { x: '120vw', y: -200, scale: 2.5, z: 200, opacity: 1, ease: 'power1.inOut', scrollTrigger: { trigger: document.body, start: '35% top', end: '55% top', scrub: 1.5 } }
-        );
-        gsap.fromTo('.global-bird-2',
-          { x: '120vw', y: 400, scale: 0.1, z: -800, opacity: 1 },
-          { x: '-20vw', y: 0, scale: 3, z: 400, opacity: 1, ease: 'power1.inOut', scrollTrigger: { trigger: document.body, start: '45% top', end: '65% top', scrub: 2 } }
-        );
-        gsap.fromTo('.global-bird-3',
-          { x: '-20vw', y: 100, scale: 0.5, opacity: 1 },
-          { x: '120vw', y: 500, scale: 3.5, opacity: 1, ease: 'power1.inOut', scrollTrigger: { trigger: document.body, start: '70% top', end: '90% top', scrub: 1.5 } }
+        // Reisenova Travel & Tours text flying in on scroll trigger and settling beautifully on the right of the palm tree
+        gsap.fromTo('.global-reisenova-text',
+          { x: '110vw', y: '80vh', rotate: -15, scale: 0.5, opacity: 0 },
+          {
+            x: '52vw',
+            y: '72vh',
+            rotate: 0,
+            scale: 1.4,
+            opacity: 1,
+            ease: 'sine.out',
+            scrollTrigger: {
+              trigger: document.body,
+              start: '5% top',
+              end: '38% top',
+              scrub: 2,
+            }
+          }
         );
         
       }, containerRef);
-      return () => ctx.revert();
-    }, 500); // Slight delay to let components mount
+    }, 150); // Slight delay to let components mount and lenis to scroll to top
     
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+    };
+  }, [location.pathname]);
 
   // Mouse Parallax for background
   useLayoutEffect(() => {
@@ -178,42 +430,59 @@ const JungleBackground = () => {
 
       {/* Wildlife */}
       <div className="absolute inset-0 z-10 transform-style-3d">
-        <div className="global-monkey absolute top-[10%] left-[60%] text-forest/50 dark:text-[#fdfbf7]/5 opacity-0 transform-gpu will-change-transform">
-          <MonkeySilhouette className="w-64 h-64" />
-        </div>
-        
-        <div className="global-bird-1 absolute top-[40%] left-[30%] text-forest/50 dark:text-[#fdfbf7]/5 opacity-0 transform-gpu will-change-transform">
-          <Bird className="w-20 h-20 scale-x-[-1]" strokeWidth={1.5} />
-        </div>
-        <div className="global-bird-2 absolute top-[50%] left-[60%] text-forest/60 dark:text-[#fdfbf7]/5 opacity-0 transform-gpu will-change-transform">
-          <div className="relative">
-            <Bird className="w-16 h-16" strokeWidth={2} />
-            <span className="absolute top-[28%] left-[96%] text-[9px] font-bold tracking-[0.2em] uppercase">Reisenova</span>
+        <div style={{ opacity: isDetailsPage ? 0 : 1, transition: 'opacity 0.5s ease' }}>
+          {/* Glass Palm Tree Badge (replacing the monkey) */}
+          <div className="global-glass-badge absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-40">
+            <GlassPalmTreeBadge className="w-64 h-64" isDark={isDark} />
+          </div>
+          
+          {/* Reisenova Travel & Tours text (replacing the bird with a merging transition) */}
+          <div className="global-reisenova-text absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-50">
+          <div className="flex flex-col items-start p-2">
+            <span 
+              className="text-4xl md:text-6xl font-logo font-bold tracking-[0.04em] uppercase text-orange italic leading-none"
+              style={{
+                fontFamily: '"Permanent Marker", "Caveat", "Playfair Display", cursive',
+                textShadow: '1px 1px 0px rgba(255,255,255,1), -1px 1px 0px rgba(255,255,255,1), 1px -1px 0px rgba(255,255,255,1), -1px -1px 0px rgba(255,255,255,1), 0 0 6px rgba(255,255,255,1)'
+              }}
+            >
+              REISENOVA
+            </span>
+            <span 
+              className="text-xs md:text-sm font-semibold tracking-[0.35em] uppercase mt-2 filter"
+              style={{
+                letterSpacing: '0.35em',
+                color: isDark ? '#ffffff' : '#000000',
+                textShadow: isDark 
+                  ? '1px 1px 0px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.8)' 
+                  : '1px 1px 0px rgba(255,255,255,0.8), 0 1px 2px rgba(255,255,255,0.3)'
+              }}
+            >
+              TRAVEL & TOURS
+            </span>
           </div>
         </div>
-        <div className="global-bird-3 absolute top-[20%] left-[20%] text-forest/40 dark:text-[#fdfbf7]/5 opacity-0 transform-gpu will-change-transform">
-          <Bird className="w-24 h-24 scale-x-[-1]" strokeWidth={1.5} />
         </div>
       </div>
 
       {/* Leaves */}
       <div className="absolute inset-0 z-20 transform-style-3d">
         {/* Initial foreground leaves - Top Left */}
-        <HabaralaLeaf className="global-leaf-1 absolute -top-10 -left-20 w-[30rem] h-[30rem] text-[#2c4a38] dark:text-[#fdfbf7]/5 rotate-[120deg] z-30 transform-gpu will-change-transform" />
-        <HabaralaLeaf className="global-leaf-1a absolute top-10 -left-32 w-[25rem] h-[25rem] text-[#243d2e] dark:text-[#fdfbf7]/5 rotate-[145deg] z-20 blur-[1px] transform-gpu will-change-transform" />
-        <HabaralaLeaf className="global-leaf-1b absolute -top-24 left-10 w-[28rem] h-[28rem] text-[#32523f] dark:text-[#fdfbf7]/5 rotate-[90deg] z-10 transform-gpu will-change-transform" />
+        <SigiriyaLeaf className="global-leaf-1 absolute -top-12 -left-24 w-[36rem] h-[36rem] z-30 transform-gpu will-change-transform rotate-[120deg]" rotation={120} config={leavesConfig.topLeft} />
+        <HabaralaLeaf className="global-leaf-1a absolute top-12 -left-36 w-[30rem] h-[30rem] text-[#243d2e] dark:text-[#fdfbf7]/5 rotate-[145deg] z-20 blur-[1px] transform-gpu will-change-transform" />
+        <HabaralaLeaf className="global-leaf-1b absolute -top-28 left-12 w-[34rem] h-[34rem] text-[#32523f] dark:text-[#fdfbf7]/5 rotate-[90deg] z-10 transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Top Right */}
-        <HabaralaLeaf className="global-leaf-2 absolute -top-20 -right-20 w-[35rem] h-[35rem] text-[#1e3b2a] dark:text-[#fdfbf7]/5 rotate-[-60deg] z-30 transform-gpu will-change-transform" />
+        <DambullaCaveTempleLeaf className="global-leaf-2 absolute -top-24 -right-24 w-[33rem] h-[33rem] z-30 transform-gpu will-change-transform rotate-[-60deg]" rotation={-60} config={leavesConfig.topRight} />
         <HabaralaLeaf className="global-leaf-2a absolute top-16 -right-32 w-[32rem] h-[32rem] text-[#193222] dark:text-[#fdfbf7]/5 rotate-[-85deg] z-20 blur-[1px] transform-gpu will-change-transform" />
         <HabaralaLeaf className="global-leaf-2b absolute -top-10 right-32 w-[22rem] h-[22rem] text-[#254231] dark:text-[#fdfbf7]/5 rotate-[-30deg] z-10 transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Bottom Left */}
-        <HabaralaLeaf className="global-leaf-7 absolute -bottom-10 -left-16 w-[36rem] h-[36rem] text-[#203a2a] dark:text-[#fdfbf7]/5 rotate-[60deg] z-30 transform-gpu will-change-transform" />
+        <GalleLighthouseLeaf className="global-leaf-7 absolute -bottom-10 -left-16 w-[36rem] h-[36rem] z-30 transform-gpu will-change-transform rotate-[60deg]" rotation={60} config={leavesConfig.bottomLeft} />
         <HabaralaLeaf className="global-leaf-7a absolute -bottom-24 left-10 w-[42rem] h-[42rem] text-[#172d1f] dark:text-[#fdfbf7]/5 rotate-[35deg] z-20 blur-[2px] transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Bottom Right */}
-        <HabaralaLeaf className="global-leaf-8 absolute -bottom-16 -right-16 w-[38rem] h-[38rem] text-[#23422d] dark:text-[#fdfbf7]/5 rotate-[-45deg] z-30 transform-gpu will-change-transform" />
+        <DaladaMaligawaLeaf className="global-leaf-8 absolute -bottom-36 -right-36 w-[43rem] h-[43rem] z-30 transform-gpu will-change-transform rotate-[-45deg]" rotation={-45} config={leavesConfig.bottomRight} />
         <HabaralaLeaf className="global-leaf-8a absolute -bottom-10 right-24 w-[30rem] h-[30rem] text-[#1a3322] dark:text-[#fdfbf7]/5 rotate-[-15deg] z-20 blur-[1px] transform-gpu will-change-transform" />
         
       </div>

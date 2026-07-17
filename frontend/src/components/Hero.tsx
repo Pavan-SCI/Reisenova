@@ -1,8 +1,9 @@
 import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
-import { Compass, Palmtree, Sun, Menu, X, User } from 'lucide-react';
+import { Compass, Menu, X, User } from 'lucide-react';
 import DarkModeToggle from './DarkModeToggle';
+import ReisenovaLogo from './ReisenovaLogo';
 
 const Hero = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -78,63 +79,28 @@ const Hero = () => {
       <div className="h-screen w-full flex items-center justify-center transform-style-3d">
         {/* Header / Nav */}
         <header className="absolute top-0 left-0 w-full z-50 pt-6 pb-12 px-8 flex justify-between items-center reveal-ui">
-          <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)] backdrop-blur-xl transition-all duration-500 pointer-events-none -z-10">
-            {/* Light mode color overlays (smooth transition) */}
-            <div className="absolute inset-0 transition-opacity duration-500 opacity-100 dark:opacity-0">
-              {/* Light mode background with horizontal mask for logo and right side */}
-              <div 
-                className="absolute inset-0 bg-white/30"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))',
-                  maskImage: 'linear-gradient(to right, transparent 0%, transparent 280px, black 340px, black calc(100% - 340px), transparent calc(100% - 280px))'
-                }}
-              />
-              {/* Dark blur specifically behind the logo in light mode */}
-              <div 
-                className="absolute inset-0 bg-black/40"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)',
-                  maskImage: 'linear-gradient(to right, black 0%, black 250px, transparent 340px)'
-                }}
-              />
-              {/* Dark blur specifically behind the right side in light mode */}
-              <div 
-                className="absolute inset-0 bg-black/40"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)',
-                  maskImage: 'linear-gradient(to left, black 0%, black 280px, transparent 360px)'
-                }}
-              />
-            </div>
-            {/* Dark mode background without horizontal mask (smooth transition) */}
-            <div 
-              className="absolute inset-0 bg-[#0a0f0d]/80 transition-opacity duration-500 opacity-0 dark:opacity-100"
+          {/* Completely transparent background to ensure the natural leaves behind remain sharp and clear */}
+          <div className="absolute inset-0 transition-all duration-500 pointer-events-none -z-10 bg-transparent" />
+          {/* Styled Reisenova Logo */}
+          <div 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center group cursor-pointer bg-transparent px-5 py-2.5 rounded-2xl transition-all duration-500 hover:bg-white/10 dark:hover:bg-white/5 -mt-6"
+          >
+            <ReisenovaLogo 
+              iconSize="md" 
+              textColorClass="text-black" 
+              palmTreeColorClass="text-black" 
+              hasShadow={false}
             />
           </div>
-          {/* Styled Reisenova Logo */}
-          <div className="flex items-center gap-2 group cursor-pointer bg-transparent px-5 py-2.5 rounded-2xl transition-all duration-500 hover:bg-white/20 dark:hover:bg-white/10 -mt-6">
-            <div className="relative flex items-center justify-center h-10 w-12">
-              <Palmtree size={32} className="text-white dark:text-[#fdfbf7] absolute left-0 bottom-0 z-10 -rotate-12 group-hover:rotate-0 transition-all duration-500" />
-              <Palmtree size={24} className="text-white dark:text-[#fdfbf7] absolute right-2 bottom-1 z-10 rotate-12 group-hover:rotate-0 transition-all duration-500" />
-              <Sun size={20} className="text-orange absolute bottom-2 left-4 z-0 fill-current group-hover:scale-125 transition-transform duration-700" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-orange font-serif text-2xl tracking-[0.2em] uppercase font-bold italic leading-none group-hover:text-white dark:group-hover:text-[#fdfbf7] transition-colors duration-500">
-                Reisenova
-              </span>
-              <span className="text-white dark:text-[#fdfbf7] text-[10px] tracking-[0.3em] font-medium uppercase mt-1 pl-1 transition-colors duration-500">
-                Travel & Tours
-              </span>
-            </div>
-          </div>
 
-          <nav className="hidden lg:flex gap-8 text-forest dark:text-[#fdfbf7]/90 text-sm tracking-widest uppercase font-semibold transition-colors duration-500 -mt-6">
-            <a href="#about" className="hover:text-orange transition-colors">About</a>
-            <Link to="/destinations" className="hover:text-orange transition-colors">Destinations</Link>
-            <Link to="/packages" className="hover:text-orange transition-colors">Packages</Link>
-            <Link to="/hotels" className="hover:text-orange transition-colors">Hotels</Link>
-            <Link to="/vehicles" className="hover:text-orange transition-colors">Vehicles</Link>
-            <Link to="/plan-trip" className="hover:text-orange transition-colors">Plan Trip</Link>
+          <nav className="hidden lg:flex gap-8 text-forest dark:text-[#fdfbf7] text-sm tracking-widest uppercase font-semibold transition-colors duration-500 -mt-6">
+            <a href="#about" className="hero-nav-link hover:text-orange transition-colors">About</a>
+            <Link to="/destinations" className="hero-nav-link hover:text-orange transition-colors">Destinations</Link>
+            <Link to="/packages" className="hero-nav-link hover:text-orange transition-colors">Packages</Link>
+            <Link to="/hotels" className="hero-nav-link hover:text-orange transition-colors">Hotels</Link>
+            <Link to="/vehicles" className="hero-nav-link hover:text-orange transition-colors">Vehicles</Link>
+            <Link to="/plan-trip" className="hero-nav-link hover:text-orange transition-colors">Plan Trip</Link>
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4 -mt-6">
@@ -142,21 +108,27 @@ const Hero = () => {
             {isLoggedIn ? (
               <button 
                 onClick={() => { 
-                  localStorage.removeItem('isAdminLoggedIn'); 
-                  localStorage.removeItem('isUserLoggedIn'); 
+                  const isDarkMode = localStorage.getItem('darkMode');
+                  localStorage.clear();
+                  if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
                   setIsLoggedIn(false); 
                   window.location.reload(); 
                 }} 
-                className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange transition-colors duration-500"
+                className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange hero-nav-link transition-colors duration-500"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
               >
                 <span className="text-sm uppercase tracking-wider font-semibold">Log Out</span>
               </button>
             ) : (
-              <Link to="/login" className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange transition-colors duration-500">
+              <Link 
+                to="/login" 
+                className="hidden md:flex items-center gap-2 text-white dark:text-[#fdfbf7] hover:text-orange dark:hover:text-orange hero-nav-link transition-colors duration-500"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+              >
                 <span className="text-sm uppercase tracking-wider font-semibold">Log In</span>
               </Link>
             )}
-            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/20 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-colors duration-500">
+            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/40 bg-black/20 dark:bg-black/30 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-all duration-500 shadow-lg drop-shadow-md">
               <User size={18} />
             </Link>
             <Link to="/plan-trip" className="hidden md:flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-white hover:text-forest dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-all duration-500 shadow-lg hover:shadow-orange/30 group">
@@ -165,10 +137,10 @@ const Hero = () => {
             
             {/* Mobile Menu Toggle */}
             <button 
-              className="lg:hidden p-2 text-white dark:text-[#fdfbf7] transition-colors duration-500"
+              className="lg:hidden p-2.5 text-forest dark:text-[#fdfbf7] bg-forest/5 dark:bg-black/35 backdrop-blur-sm rounded-full border border-forest/15 dark:border-white/20 transition-all duration-500 shadow-lg drop-shadow-md hover:scale-105"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </header>
@@ -186,8 +158,9 @@ const Hero = () => {
               {isLoggedIn ? (
                 <button 
                   onClick={() => { 
-                    localStorage.removeItem('isAdminLoggedIn'); 
-                    localStorage.removeItem('isUserLoggedIn'); 
+                    const isDarkMode = localStorage.getItem('darkMode');
+                    localStorage.clear();
+                    if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
                     setIsLoggedIn(false); 
                     setMobileMenuOpen(false);
                     window.location.reload(); 

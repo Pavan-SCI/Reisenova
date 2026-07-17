@@ -1,8 +1,10 @@
-import React, { useLayoutEffect, useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowLeft, MapPin, Clock, CalendarCheck, Info, CheckCircle } from 'lucide-react';
 import ImageCarousel from '../components/ImageCarousel';
+import PhonePromptModal from '../components/PhonePromptModal';
+import { checkAndGetUserPhone } from '../utils/bookingHelper';
 
 const allPackages = {
   '7-day-cultural-triangle': {
@@ -115,6 +117,8 @@ const PackageDetailsPage = () => {
   const [isBooked, setIsBooked] = React.useState(false);
   const navigate = useNavigate();
 
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+
   const handleBookClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     const isUser = localStorage.getItem('isUserLoggedIn') === 'true';
@@ -125,12 +129,25 @@ const PackageDetailsPage = () => {
       navigate('/login');
       return;
     }
+
+    const phone = await checkAndGetUserPhone(userId || '');
+    if (phone) {
+      executeBooking(phone);
+    } else {
+      setIsPhoneModalOpen(true);
+    }
+  };
+
+  const executeBooking = async (phone: string) => {
+    const userEmail = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId');
     try {
       const payload = {
         userId: userId || userEmail || 'unknown_user',
         userEmail: userEmail || 'unknown_user',
         packageId: pkg?.id || id,
-        packageDetails: pkg
+        packageDetails: pkg,
+        userPhone: phone
       };
       const res = await fetch('/api/bookings/package', {
         method: 'POST',
@@ -140,6 +157,7 @@ const PackageDetailsPage = () => {
       if (res.ok) {
         alert('Package booked successfully!');
         setIsBooked(true);
+        setIsPhoneModalOpen(false);
       } else {
         alert('Failed to book package.');
       }
@@ -197,7 +215,6 @@ const PackageDetailsPage = () => {
 
   useLayoutEffect(() => {
     if (loading || !pkg) return;
-    window.scrollTo(0, 0);
     
     const ctx = gsap.context(() => {
       gsap.fromTo('.pkg-details-reveal',
@@ -254,7 +271,7 @@ const PackageDetailsPage = () => {
           <ImageCarousel images={pkg.images && pkg.images.length > 0 ? pkg.images : [pkg.img]} className="w-full h-full" alwaysShowArrows darkOverlay darkOverlayOpacity="bg-black/50" />
         </div>
         
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 pointer-events-none">
           <div className="pkg-details-reveal">
             <span className="bg-orange/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[#fdfbf7] text-xs tracking-[0.2em] uppercase mb-6 inline-block font-bold">
               {pkg.duration}
@@ -367,6 +384,12 @@ const PackageDetailsPage = () => {
           </div>
         </div>
       </div>
+      <PhonePromptModal
+        isOpen={isPhoneModalOpen}
+        onClose={() => setIsPhoneModalOpen(false)}
+        userId={localStorage.getItem('userId') || ''}
+        onSuccess={(phone) => executeBooking(phone)}
+      />
     </section>
   );
 };

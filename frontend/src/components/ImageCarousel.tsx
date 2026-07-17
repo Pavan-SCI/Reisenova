@@ -121,15 +121,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           navigate(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
         }}
         className={`absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30
-          w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white
+          w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-forest
           transition-all duration-300 ease-out hover:scale-110 active:scale-95
+          bg-white/90 hover:bg-orange hover:text-white backdrop-blur-md shadow-xl border border-black/5
           ${arrowVisibilityClass}`}
-        style={{
-          background: 'rgba(0,0,0,0.35)',
-          backdropFilter: 'blur(14px)',
-          border: '1px solid rgba(255,255,255,0.20)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
-        }}
         aria-label="Previous image"
       >
         <ChevronLeft size={22} strokeWidth={2.5} />
@@ -142,15 +137,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           navigate((currentIndex + 1) % images.length);
         }}
         className={`absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30
-          w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-white
+          w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-forest
           transition-all duration-300 ease-out hover:scale-110 active:scale-95
+          bg-white/90 hover:bg-orange hover:text-white backdrop-blur-md shadow-xl border border-black/5
           ${arrowVisibilityClass}`}
-        style={{
-          background: 'rgba(0,0,0,0.35)',
-          backdropFilter: 'blur(14px)',
-          border: '1px solid rgba(255,255,255,0.20)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
-        }}
         aria-label="Next image"
       >
         <ChevronRight size={22} strokeWidth={2.5} />

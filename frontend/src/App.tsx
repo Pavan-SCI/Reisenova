@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -24,13 +24,24 @@ gsap.registerPlugin(ScrollTrigger);
 function ScrollToTop() {
   const { pathname } = useLocation();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  useLayoutEffect(() => {
+    // Disable native scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
     // @ts-ignore
     if (window.lenis) {
       // @ts-ignore
-      window.lenis.scrollTo(0, { duration: 1.5, ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+      window.lenis.stop();
+      // @ts-ignore
+      window.lenis.scrollTo(0, { immediate: true, force: true });
+      // @ts-ignore
+      window.lenis.start();
+    } else {
+      window.scrollTo(0, 0);
     }
+    
     setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
