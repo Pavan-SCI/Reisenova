@@ -1,5 +1,7 @@
-import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
-import { Edit, Save, Info } from 'lucide-react';
+import fs from 'fs';
+
+const componentCode = `import React, { useLayoutEffect, useEffect, useRef, useState } from 'react';
+import { Edit, Save } from 'lucide-react';
 import gsap from 'gsap';
 
 const defaultImages = [
@@ -46,24 +48,9 @@ const Gallery = () => {
       const items = gsap.utils.toArray('.gallery-h-item');
       
       if (items.length > 0) {
-        // Initial setup for items to prevent flash
-        items.forEach((item: any, i: number) => {
-          const dist = i;
-          gsap.set(item, {
-            x: `${dist * 60}vw`,
-            rotateY: -dist * 45,
-            z: -Math.abs(dist) * 600,
-            scale: 1 - Math.abs(dist) * 0.1,
-            opacity: 1 - Math.abs(dist) * 0.4,
-            zIndex: 100 - Math.abs(dist),
-            transformOrigin: "center center -200px"
-          });
-        });
-
-        const proxy = { progress: 0 };
-        
-        gsap.to(proxy, {
-          progress: items.length - 1,
+        // Horizontal scroll animation
+        gsap.to(items, {
+          xPercent: -100 * (items.length - 1),
           ease: 'none',
           scrollTrigger: {
             trigger: containerRef.current,
@@ -75,49 +62,26 @@ const Gallery = () => {
               delay: 0.1,
               ease: 'power3.inOut'
             },
-            end: () => "+=" + (items.length * window.innerWidth * 0.8),
-            onUpdate: () => {
-              const currentProgress = proxy.progress;
-              items.forEach((item: any, i: number) => {
-                const dist = i - currentProgress;
-                
-                // 3D Math for CoverFlow
-                const xOffset = dist * 60; 
-                const rotateY = -dist * 45; 
-                const zOffset = -Math.abs(dist) * 600; 
-                const scale = 1 - Math.abs(dist) * 0.1;
-                const opacity = 1 - Math.abs(dist) * 0.4;
-                const zIndex = 100 - Math.round(Math.abs(dist) * 10);
-                
-                gsap.set(item, {
-                  x: `${xOffset}vw`,
-                  rotateY: rotateY,
-                  z: zOffset,
-                  scale: scale,
-                  opacity: Math.max(0, opacity),
-                  zIndex: zIndex,
-                });
-
-                // Image parallax
-                const img = item.querySelector('img');
-                if (img) {
-                  gsap.set(img, {
-                    xPercent: dist * 5
-                  });
-                }
-                
-                // Title animation
-                const title = item.querySelector('h3');
-                if (title) {
-                  const titleProgress = 1 - Math.min(1, Math.abs(dist) * 1.5);
-                  gsap.set(title, {
-                    yPercent: (1 - titleProgress) * 100,
-                    opacity: titleProgress
-                  });
-                }
-              });
-            }
+            end: () => "+=" + slider.offsetWidth
           }
+        });
+        
+        // Image parallax inside horizontal scroll
+        items.forEach((item: any) => {
+          const img = item.querySelector('img');
+          gsap.fromTo(img, 
+            { xPercent: -8 },
+            {
+              xPercent: 8,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: containerRef.current,
+                start: 'top top',
+                end: () => "+=" + slider.offsetWidth,
+                scrub: true,
+              }
+            }
+          );
         });
       }
     }, containerRef);
@@ -175,7 +139,7 @@ const Gallery = () => {
 
   return (
     <div className="gallery-wrapper relative">
-      <section id="gallery" ref={containerRef} className={`${isEditing ? 'min-h-screen py-32 overflow-y-auto flex-col' : 'h-screen overflow-hidden'} w-full bg-transparent text-forest dark:text-[#fdfbf7] relative flex items-center`}>
+      <section id="gallery" ref={containerRef} className={\`\${isEditing ? 'min-h-screen py-32 overflow-y-auto' : 'h-screen overflow-hidden'} w-full bg-transparent text-forest dark:text-[#fdfbf7] relative flex flex-col items-center\`}>
         
         {isAdmin && (
           <div className="absolute top-4 right-4 z-[100] fixed md:absolute">
@@ -191,40 +155,25 @@ const Gallery = () => {
           </div>
         )}
 
-        <div className={`${isEditing ? 'w-full px-6 mb-12 max-w-[1400px] mx-auto z-20' : 'absolute top-12 left-6 md:left-12 z-20'}`}>
+        <div className={\`\${isEditing ? 'w-full px-6 mb-12 max-w-[1400px] mx-auto z-20' : 'absolute top-12 left-6 md:left-12 z-20'}\`}>
           {isEditing ? (
-            <div className="space-y-4 max-w-lg">
-              {/* Image size recommendation banner */}
-              <div className="bg-[#fff9e6] dark:bg-[#1f1a10] border border-[#ffb74d] text-[#e65100] dark:text-[#ffb74d] p-4 rounded-xl flex items-start gap-3 shadow-md mb-4 text-xs md:text-sm">
-                <Info className="shrink-0 mt-0.5 text-orange" size={20} />
-                <div className="space-y-1 font-medium">
-                  <p className="font-bold">Recommended Image Dimensions for perfect, crop-free display:</p>
-                  <p className="opacity-95">• 1400 x 800 pixels (or any landscape image with a 16:9 aspect ratio)</p>
-                  <div className="pt-1.5 border-t border-[#ffb74d]/30 mt-1.5">
-                    <p className="font-bold">කැපී යාම වළක්වා (Crop නොවී) පින්තූරය නිවැරදිව දර්ශනය වීමට නිර්දේශිත ප්‍රමාණය:</p>
-                    <p className="opacity-95">• 1400 x 800 pixels (හෝ 16:9 Landscape අනුපාතයේ පින්තූරයක්)</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4 bg-white/10 p-4 rounded-xl backdrop-blur-md">
-                <input 
-                  type="text" 
-                  name="galleryTitle1" 
-                  value={settings.galleryTitle1} 
-                  onChange={handleChange} 
-                  className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-forest" 
-                  placeholder="Title Line 1"
-                />
-                <input 
-                  type="text" 
-                  name="galleryTitle2" 
-                  value={settings.galleryTitle2} 
-                  onChange={handleChange} 
-                  className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-orange" 
-                  placeholder="Title Line 2"
-                />
-              </div>
+            <div className="space-y-4 max-w-md bg-white/10 p-4 rounded-xl backdrop-blur-md">
+              <input 
+                type="text" 
+                name="galleryTitle1" 
+                value={settings.galleryTitle1} 
+                onChange={handleChange} 
+                className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-forest" 
+                placeholder="Title Line 1"
+              />
+              <input 
+                type="text" 
+                name="galleryTitle2" 
+                value={settings.galleryTitle2} 
+                onChange={handleChange} 
+                className="w-full bg-white/50 border border-forest/20 p-2 rounded text-xl font-serif text-orange" 
+                placeholder="Title Line 2"
+              />
             </div>
           ) : (
             <h2 className="text-4xl md:text-6xl font-serif text-forest dark:text-[#fdfbf7] tracking-tight drop-shadow-sm">
@@ -233,19 +182,19 @@ const Gallery = () => {
           )}
         </div>
 
-        <div ref={sliderRef} className={`${isEditing ? 'flex flex-col gap-12 w-full px-6 max-w-[1400px] mx-auto pb-20' : 'relative w-full h-full flex items-center justify-center z-10 pt-20 perspective-[2000px]'}`}>
+        <div ref={sliderRef} className={\`\${isEditing ? 'flex flex-col gap-12 w-full px-6 max-w-[1400px] mx-auto pb-20' : 'flex h-full w-[500vw] items-center relative z-10 pt-20'}\`}>
           {settings.galleryImages.map((item, idx) => (
-            <div key={idx} className={`${isEditing ? 'w-full relative rounded-3xl overflow-hidden h-[400px]' : 'gallery-h-item absolute w-[95vw] md:w-[80vw] max-w-[1400px] h-[60vh] md:h-[70vh] flex items-center justify-center px-4 shrink-0 transform-style-3d'}`}>
-              <div className={`w-full h-full relative overflow-hidden rounded-3xl group ${isEditing ? '' : 'cursor-pointer shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 transform-style-3d'}`}>
+            <div key={idx} className={\`\${isEditing ? 'w-full relative rounded-3xl overflow-hidden h-[400px]' : 'gallery-h-item w-screen h-[70vh] flex items-center justify-center relative px-4 md:px-20 shrink-0 perspective-[1500px]'}\`}>
+              <div className={\`w-full h-full relative overflow-hidden rounded-3xl group \${isEditing ? '' : 'cursor-pointer shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] bg-white/40 dark:bg-[#0a0f0d]/40 backdrop-blur-md border border-forest/10 dark:border-white/10 transform-style-3d'}\`}>
                 {!isEditing && <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-700 z-10" />}
                 
                 <img 
                   src={item.url} 
                   alt={item.title} 
-                  className={`${isEditing ? 'w-full h-full object-cover' : 'w-[120%] max-w-none h-full object-cover absolute left-[-10%] will-change-transform pointer-events-none'}`}
+                  className={\`\${isEditing ? 'w-full h-full object-cover' : 'w-[120%] max-w-none h-full object-cover absolute left-[-10%] will-change-transform scale-100 group-hover:scale-105 transition-transform duration-1000 ease-out pointer-events-none'}\`}
                 />
                 
-                <div className={`absolute bottom-12 left-12 z-20 ${isEditing ? 'right-12' : 'overflow-hidden transform-style-3d'}`} style={isEditing ? {} : { transform: 'translateZ(60px)' }}>
+                <div className={\`absolute bottom-12 left-12 z-20 \${isEditing ? 'right-12' : 'overflow-hidden transform-style-3d'}\`} style={isEditing ? {} : { transform: 'translateZ(60px)' }}>
                   {isEditing ? (
                     <input 
                       type="text" 
@@ -255,7 +204,7 @@ const Gallery = () => {
                       placeholder="Image Title"
                     />
                   ) : (
-                    <h3 className="text-5xl md:text-7xl font-serif text-[#fdfbf7] drop-shadow-2xl">
+                    <h3 className="text-5xl md:text-7xl font-serif text-[#fdfbf7] translate-y-[100%] group-hover:translate-y-0 transition-transform duration-700 ease-out drop-shadow-2xl">
                       {item.title}
                     </h3>
                   )}
@@ -288,3 +237,6 @@ const Gallery = () => {
 };
 
 export default Gallery;
+`
+
+fs.writeFileSync('src/components/Gallery.tsx', componentCode);
