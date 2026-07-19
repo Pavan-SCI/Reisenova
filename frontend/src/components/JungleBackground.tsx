@@ -83,7 +83,7 @@ const DynamicLeaf = ({
       <img 
         src="/leaf.png" 
         alt="" 
-        className="absolute inset-0 w-full h-full object-cover object-top opacity-30 dark:opacity-45 mix-blend-overlay pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover object-top opacity-20 dark:opacity-30 pointer-events-none"
         draggable={false} 
         onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />
@@ -451,7 +451,7 @@ const JungleBackground = () => {
           ref={bgRef}
           src="https://images.unsplash.com/photo-1518182170546-076616fdacaf?q=80&w=2940&auto=format&fit=crop"
           alt="Deep Jungle Sri Lanka"
-          className="w-full h-full object-cover origin-center opacity-50 dark:opacity-80 filter contrast-100 dark:contrast-125 brightness-110 dark:brightness-75 transition-[filter,opacity] duration-500"
+          className="w-full h-full object-cover origin-center opacity-50 dark:opacity-75"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       </div>
@@ -497,21 +497,21 @@ const JungleBackground = () => {
       <div className="absolute inset-0 z-20 transform-style-3d">
         {/* Initial foreground leaves - Top Left */}
         <SigiriyaLeaf className="global-leaf-1 absolute -top-12 -left-24 w-[36rem] h-[36rem] z-30 transform-gpu will-change-transform rotate-[120deg]" rotation={120} config={leavesConfig.topLeft} />
-        <HabaralaLeaf className="global-leaf-1a absolute top-12 -left-36 w-[30rem] h-[30rem] text-[#243d2e] dark:text-[#fdfbf7]/5 rotate-[145deg] z-20 blur-[1px] transform-gpu will-change-transform" />
+        <HabaralaLeaf className="global-leaf-1a absolute top-12 -left-36 w-[30rem] h-[30rem] text-[#243d2e] dark:text-[#fdfbf7]/5 rotate-[145deg] z-20 transform-gpu will-change-transform" />
         <HabaralaLeaf className="global-leaf-1b absolute -top-28 left-12 w-[34rem] h-[34rem] text-[#32523f] dark:text-[#fdfbf7]/5 rotate-[90deg] z-10 transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Top Right */}
         <DambullaCaveTempleLeaf className="global-leaf-2 absolute -top-24 -right-24 w-[33rem] h-[33rem] z-30 transform-gpu will-change-transform rotate-[-60deg]" rotation={-60} config={leavesConfig.topRight} />
-        <HabaralaLeaf className="global-leaf-2a absolute top-16 -right-32 w-[32rem] h-[32rem] text-[#193222] dark:text-[#fdfbf7]/5 rotate-[-85deg] z-20 blur-[1px] transform-gpu will-change-transform" />
+        <HabaralaLeaf className="global-leaf-2a absolute top-16 -right-32 w-[32rem] h-[32rem] text-[#193222] dark:text-[#fdfbf7]/5 rotate-[-85deg] z-20 transform-gpu will-change-transform" />
         <HabaralaLeaf className="global-leaf-2b absolute -top-10 right-32 w-[22rem] h-[22rem] text-[#254231] dark:text-[#fdfbf7]/5 rotate-[-30deg] z-10 transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Bottom Left */}
         <GalleLighthouseLeaf className="global-leaf-7 absolute -bottom-10 -left-16 w-[36rem] h-[36rem] z-30 transform-gpu will-change-transform rotate-[60deg]" rotation={60} config={leavesConfig.bottomLeft} />
-        <HabaralaLeaf className="global-leaf-7a absolute -bottom-24 left-10 w-[42rem] h-[42rem] text-[#172d1f] dark:text-[#fdfbf7]/5 rotate-[35deg] z-20 blur-[2px] transform-gpu will-change-transform" />
+        <HabaralaLeaf className="global-leaf-7a absolute -bottom-24 left-10 w-[42rem] h-[42rem] text-[#172d1f] dark:text-[#fdfbf7]/5 rotate-[35deg] z-20 transform-gpu will-change-transform" />
 
         {/* Initial foreground leaves - Bottom Right */}
         <DaladaMaligawaLeaf className="global-leaf-8 absolute -bottom-36 -right-36 w-[43rem] h-[43rem] z-30 transform-gpu will-change-transform rotate-[-45deg]" rotation={-45} config={leavesConfig.bottomRight} />
-        <HabaralaLeaf className="global-leaf-8a absolute -bottom-10 right-24 w-[30rem] h-[30rem] text-[#1a3322] dark:text-[#fdfbf7]/5 rotate-[-15deg] z-20 blur-[1px] transform-gpu will-change-transform" />
+        <HabaralaLeaf className="global-leaf-8a absolute -bottom-10 right-24 w-[30rem] h-[30rem] text-[#1a3322] dark:text-[#fdfbf7]/5 rotate-[-15deg] z-20 transform-gpu will-change-transform" />
         
       </div>
     </div>
