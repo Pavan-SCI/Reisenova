@@ -17,36 +17,39 @@ const Hero = () => {
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      // Text flies over your head
-      gsap.to(textRef.current, {
-        y: -500,
-        rotateX: 60,
-        scale: 2,
-        z: 800,
-        ease: 'none',
-        overwrite: 'auto',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
+    let ctx: gsap.Context;
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // Text flies over your head
+        gsap.to(textRef.current, {
+          y: -500,
+          rotateX: 60,
+          scale: 2,
+          z: 800,
+          ease: 'none',
+          overwrite: 'auto',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+        });
 
-      // Initial reveal animation
-      gsap.fromTo(
-        '.reveal-text',
-        { y: 150, opacity: 0, rotateX: 30, scale: 0.9 },
-        { y: 0, opacity: 1, rotateX: 0, scale: 1, duration: 1.8, stagger: 0.2, ease: 'power4.out', delay: 0.5, transformPerspective: 1500 }
-      );
-      
-      gsap.fromTo(
-        '.reveal-ui',
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power3.out', delay: 1.5 }
-      );
-    }, containerRef);
+        // Initial reveal animation
+        gsap.fromTo(
+          '.reveal-text',
+          { y: 150, opacity: 0, rotateX: 30, scale: 0.9 },
+          { y: 0, opacity: 1, rotateX: 0, scale: 1, duration: 1.8, stagger: 0.2, ease: 'power4.out', delay: 0.2, transformPerspective: 1500, clearProps: 'all' }
+        );
+        
+        gsap.fromTo(
+          '.reveal-ui',
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power3.out', delay: 0.8, clearProps: 'all' }
+        );
+      }, containerRef);
+    }, 150);
 
     // Mouse Parallax for 3D effect
     const handleMouseMove = (e: MouseEvent) => {
@@ -69,7 +72,8 @@ const Hero = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
-      ctx.revert();
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
