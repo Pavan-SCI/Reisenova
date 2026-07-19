@@ -27,57 +27,69 @@ const DynamicLeaf = ({
   x: number; 
   y: number; 
   alt: string; 
-}) => (
-  <div 
-    className={`${className} overflow-hidden`}
-    style={{
-      WebkitMaskImage: 'url("/leaf.png")',
-      maskImage: 'url("/leaf.png")',
-      WebkitMaskSize: 'cover',
-      maskSize: 'cover',
-      WebkitMaskPosition: 'top',
-      maskPosition: 'top',
-      WebkitMaskRepeat: 'no-repeat',
-      maskRepeat: 'no-repeat',
-    }}
-  >
-    {/* Inner container counter-rotated to align with screen coordinates */}
+}) => {
+  const [currentSrc, setCurrentSrc] = useState(imgUrl);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setCurrentSrc(imgUrl);
+    setHasError(false);
+  }, [imgUrl]);
+
+  return (
     <div 
-      className="absolute inset-0 w-full h-full"
+      className={`${className} overflow-hidden`}
       style={{
-        transform: `rotate(${-rotation}deg)`,
+        WebkitMaskImage: 'url("/leaf.png")',
+        maskImage: 'url("/leaf.png")',
+        WebkitMaskSize: 'cover',
+        maskSize: 'cover',
+        WebkitMaskPosition: 'top',
+        maskPosition: 'top',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
       }}
     >
-      {/* Photo background centered and scaled perfectly */}
-      <img 
-        src={imgUrl} 
-        alt={alt} 
-        className="absolute inset-0 w-full h-full object-cover"
+      {/* Inner container counter-rotated to align with screen coordinates */}
+      <div 
+        className="absolute inset-0 w-full h-full"
         style={{
-          transform: `scale(${scale}) translate(${x}%, ${y}%)`,
+          transform: `rotate(${-rotation}deg)`,
         }}
+      >
+        {/* Photo background centered and scaled perfectly */}
+        {!hasError && (
+          <img 
+            src={currentSrc} 
+            alt={alt} 
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              transform: `scale(${scale}) translate(${x}%, ${y}%)`,
+            }}
+            draggable={false} 
+            referrerPolicy="no-referrer"
+            onError={() => { 
+              if (currentSrc !== fallbackImgUrl) {
+                setCurrentSrc(fallbackImgUrl);
+              } else {
+                setHasError(true);
+              }
+            }}
+          />
+        )}
+      </div>
+
+      {/* Semi-transparent leaf texture on top to keep veins and leaf details visible */}
+      <img 
+        src="/leaf.png" 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-cover object-top opacity-30 dark:opacity-45 mix-blend-overlay pointer-events-none"
         draggable={false} 
-        referrerPolicy="no-referrer"
-        onError={(e) => { 
-          if (!e.currentTarget.src.endsWith(fallbackImgUrl)) {
-            e.currentTarget.src = fallbackImgUrl;
-          } else {
-            e.currentTarget.style.display = 'none';
-          }
-        }}
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />
     </div>
-
-    {/* Semi-transparent leaf texture on top to keep veins and leaf details visible */}
-    <img 
-      src="/leaf.png" 
-      alt="" 
-      className="absolute inset-0 w-full h-full object-cover object-top opacity-30 dark:opacity-45 mix-blend-overlay pointer-events-none"
-      draggable={false} 
-      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-    />
-  </div>
-);
+  );
+};
 
 const SigiriyaLeaf = ({ className, rotation, config }: { className?: string; rotation: number; config?: { imgUrl: string; scale: number; x: number; y: number } }) => (
   <DynamicLeaf
