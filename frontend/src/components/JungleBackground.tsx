@@ -307,6 +307,7 @@ const JungleBackground = () => {
             start: 'top top',
             end: 'bottom bottom',
             scrub: true,
+            invalidateOnRefresh: true,
           },
         });
 
@@ -340,6 +341,7 @@ const JungleBackground = () => {
             start: '2% top',
             end: '28% top',
             scrub: 1,
+            invalidateOnRefresh: true,
           }
         });
 
