@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const HabaralaLeaf = ({ className }: { className?: string }) => (
-  <img src="/leaf.png" alt="" className={`object-cover object-top ${className}`} draggable={false} />
+  <img src="/leaf.png" alt="" className={`object-cover object-top ${className}`} draggable={false} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
 );
 
 const DynamicLeaf = ({ 
@@ -56,6 +56,7 @@ const DynamicLeaf = ({
         }}
         draggable={false} 
         referrerPolicy="no-referrer"
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
       />
     </div>
 
@@ -65,6 +66,7 @@ const DynamicLeaf = ({
       alt="" 
       className="absolute inset-0 w-full h-full object-cover object-top opacity-30 dark:opacity-45 mix-blend-overlay pointer-events-none"
       draggable={false} 
+      onError={(e) => { e.currentTarget.style.display = 'none'; }}
     />
   </div>
 );
@@ -389,6 +391,7 @@ const JungleBackground = () => {
           src="https://images.unsplash.com/photo-1518182170546-076616fdacaf?q=80&w=2940&auto=format&fit=crop"
           alt="Deep Jungle Sri Lanka"
           className="w-full h-full object-cover origin-center opacity-50 dark:opacity-80 filter contrast-100 dark:contrast-125 brightness-110 dark:brightness-75 transition-[filter,opacity] duration-500"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       </div>
 
