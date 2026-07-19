@@ -40,8 +40,8 @@ const Hero = () => {
         // Initial reveal animation
         gsap.fromTo(
           '.reveal-text',
-          { y: 150, opacity: 0, rotateX: 30, scale: 0.9 },
-          { y: 0, opacity: 1, rotateX: 0, scale: 1, duration: 1.8, stagger: 0.2, ease: 'power4.out', delay: 0.2, transformPerspective: 1500, clearProps: 'all' }
+          { y: 150, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1.8, stagger: 0.2, ease: 'power4.out', delay: 0.2, clearProps: 'all' }
         );
         
         gsap.fromTo(
