@@ -190,7 +190,7 @@ const Hero = () => {
         )}
 
         {/* Main Content */}
-        <div ref={parallaxRef} className="relative z-20 text-center px-4 flex flex-col items-center will-change-transform transform-style-3d pt-40 mt-12 md:mt-16 lg:mt-8 md:pt-32 pointer-events-none">
+        <div ref={parallaxRef} className="relative z-20 text-center px-4 flex flex-col items-center will-change-transform transform-style-3d pt-28 md:pt-32 mt-4 md:mt-16 lg:mt-8 pointer-events-none">
           <div ref={textRef} className="flex flex-col items-center transform-style-3d w-full">
             <div className="overflow-hidden mb-6" style={{ transform: 'translateZ(80px)' }}>
               <p className="reveal-text text-forest/90 dark:text-[#fdfbf7]/90 text-sm md:text-base uppercase tracking-[0.4em] font-bold block bg-white/40 dark:bg-[#0a0f0d]/40 border border-forest/10 dark:border-white/10 px-6 py-2 rounded-full backdrop-blur-md inline-block shadow-sm transition-colors duration-500">
@@ -198,7 +198,7 @@ const Hero = () => {
               </p>
             </div>
             <div className="overflow-hidden perspective-[1200px]" style={{ transform: 'translateZ(120px)' }}>
-              <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-5xl md:text-7xl lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
+              <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-[3.5rem] md:text-7xl lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
                 Explore <br />
                 <span className="italic font-medium text-orange tracking-normal pr-8 drop-shadow-md">Wild</span>
                 <br />

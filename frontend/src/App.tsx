@@ -84,7 +84,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <JungleBackground />
-      <main className="relative z-10 w-full overflow-hidden transition-colors duration-500 bg-transparent text-forest dark:text-[#fdfbf7]">
+      <main className="relative z-10 w-full overflow-hidden overflow-x-hidden transition-colors duration-500 bg-transparent text-forest dark:text-[#fdfbf7]">
         <CustomCursor />
         <Routes>
           <Route path="/" element={<Home />} />
