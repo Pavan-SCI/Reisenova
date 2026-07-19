@@ -390,7 +390,7 @@ const JungleBackground = () => {
         
         badgeTl.fromTo('.global-glass-badge', 
           { x: '-20vw', y: '10vh', rotate: 45, scale: 0.6, opacity: 0 },
-          { x: '25vw', y: '45vh', rotate: 0, opacity: 1, scale: 2.2, ease: 'sine.inOut', duration: 26 }
+          { x: '25vw', y: '45vh', rotate: 0, opacity: 0.4, scale: 2.2, ease: 'sine.inOut', duration: 26 }
         ).to('.global-glass-badge', {
           y: '20vh', opacity: 0, scale: 1.5, ease: 'power2.in', duration: 22
         });
@@ -408,7 +408,7 @@ const JungleBackground = () => {
 
         textTl.fromTo('.global-reisenova-text',
           { x: '110vw', y: '80vh', rotate: -15, scale: 0.5, opacity: 0 },
-          { x: '52vw', y: '72vh', rotate: 0, scale: 1.4, opacity: 1, ease: 'sine.out', duration: 33 }
+          { x: '52vw', y: '72vh', rotate: 0, scale: 1.4, opacity: 0.5, ease: 'sine.out', duration: 33 }
         ).to('.global-reisenova-text', {
           y: '90vh', opacity: 0, scale: 0.8, ease: 'power2.in', duration: 17
         });
@@ -460,12 +460,12 @@ const JungleBackground = () => {
       <div className="absolute inset-0 z-10 transform-style-3d">
         <div style={{ opacity: isDetailsPage ? 0 : 1, transition: 'opacity 0.5s ease' }}>
           {/* Glass Palm Tree Badge (replacing the monkey) */}
-          <div className="global-glass-badge absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-40">
+          <div className="global-glass-badge absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-40 blur-[3px]">
             <GlassPalmTreeBadge className="w-64 h-64" isDark={isDark} />
           </div>
           
           {/* Reisenova Travel & Tours text (replacing the bird with a merging transition) */}
-          <div className="global-reisenova-text absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-50">
+          <div className="global-reisenova-text absolute top-0 left-0 opacity-0 transform-gpu will-change-transform pointer-events-none select-none z-50 blur-[2px]">
           <div className="flex flex-col items-start p-2">
             <span 
               className="text-4xl md:text-6xl font-logo font-bold tracking-[0.04em] uppercase text-orange italic leading-none"
