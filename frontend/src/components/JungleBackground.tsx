@@ -389,7 +389,7 @@ const JungleBackground = () => {
         });
         
         badgeTl.fromTo('.global-glass-badge', 
-          { x: '100vw', y: '10vh', rotate: -45, scale: 0.6, opacity: 0 },
+          { x: '-20vw', y: '10vh', rotate: 45, scale: 0.6, opacity: 0 },
           { x: '25vw', y: '45vh', rotate: 0, opacity: 1, scale: 2.2, ease: 'sine.inOut', duration: 26 }
         ).to('.global-glass-badge', {
           y: '20vh', opacity: 0, scale: 1.5, ease: 'power2.in', duration: 22
