@@ -377,43 +377,41 @@ const JungleBackground = () => {
           }
         });
 
-        // Glass palm tree badge appearing and swinging across smoothly
-        gsap.fromTo('.global-glass-badge', 
+        // Glass palm tree badge appearing and swinging across smoothly, then fading out
+        const badgeTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: document.body,
+            start: '2% top',
+            end: '50% top',
+            scrub: 1,
+            invalidateOnRefresh: true,
+          }
+        });
+        
+        badgeTl.fromTo('.global-glass-badge', 
           { x: '100vw', y: '10vh', rotate: -45, scale: 0.6, opacity: 0 },
-          {
-            x: '25vw', 
-            y: '45vh', 
-            rotate: 0, 
-            opacity: 1,
-            scale: 2.2,
-            ease: 'sine.inOut',
-            scrollTrigger: {
-              trigger: document.body,
-              start: '5% top',
-              end: '38% top',
-              scrub: 2,
-            }
-          }
-        );
+          { x: '25vw', y: '45vh', rotate: 0, opacity: 1, scale: 2.2, ease: 'sine.inOut', duration: 26 }
+        ).to('.global-glass-badge', {
+          y: '20vh', opacity: 0, scale: 1.5, ease: 'power2.in', duration: 22
+        });
 
-        // Reisenova Travel & Tours text flying in on scroll trigger and settling beautifully on the right of the palm tree
-        gsap.fromTo('.global-reisenova-text',
-          { x: '110vw', y: '80vh', rotate: -15, scale: 0.5, opacity: 0 },
-          {
-            x: '52vw',
-            y: '72vh',
-            rotate: 0,
-            scale: 1.4,
-            opacity: 1,
-            ease: 'sine.out',
-            scrollTrigger: {
-              trigger: document.body,
-              start: '5% top',
-              end: '38% top',
-              scrub: 2,
-            }
+        // Reisenova Travel & Tours text flying in on scroll trigger, then fading out
+        const textTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: document.body,
+            start: '5% top',
+            end: '55% top',
+            scrub: 2,
+            invalidateOnRefresh: true,
           }
-        );
+        });
+
+        textTl.fromTo('.global-reisenova-text',
+          { x: '110vw', y: '80vh', rotate: -15, scale: 0.5, opacity: 0 },
+          { x: '52vw', y: '72vh', rotate: 0, scale: 1.4, opacity: 1, ease: 'sine.out', duration: 33 }
+        ).to('.global-reisenova-text', {
+          y: '90vh', opacity: 0, scale: 0.8, ease: 'power2.in', duration: 17
+        });
 
         
       }, containerRef);
