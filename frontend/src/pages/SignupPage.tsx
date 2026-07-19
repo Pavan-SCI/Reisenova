@@ -4,12 +4,32 @@ import gsap from 'gsap';
 import { ArrowLeft, User, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
 import { signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider, db } from '../lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import ReisenovaLogo from '../components/ReisenovaLogo';
 
 const SignupPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const checkAndBootstrapAdminStatus = async (uid: string, email: string) => {
+    try {
+      const adminDocRef = doc(db, 'admins', uid);
+      let adminDoc = await getDoc(adminDocRef);
+      
+      if (!adminDoc.exists()) {
+        try {
+          await setDoc(adminDocRef, { email });
+          adminDoc = await getDoc(adminDocRef);
+        } catch (e) {
+        }
+      }
+      return adminDoc.exists();
+    } catch (err) {
+      console.error('Error checking admin status', err);
+      return false;
+    }
+  };
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -73,8 +93,17 @@ const SignupPage = () => {
       localStorage.clear();
       if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
 
-      localStorage.setItem('isUserLoggedIn', 'true');
-      localStorage.setItem('userEmail', userCredential.user.email || '');
+      const userEmail = userCredential.user.email || '';
+      const isAdminDoc = await checkAndBootstrapAdminStatus(userCredential.user.uid, userEmail);
+      const isAdmin = isAdminDoc || userEmail === 'admin@reisenova.com' || userEmail === 'nuwanjskr@gmail.com';
+
+      if (isAdmin) {
+        localStorage.setItem('isAdminLoggedIn', 'true');
+      } else {
+        localStorage.setItem('isUserLoggedIn', 'true');
+      }
+
+      localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userId', userCredential.user.uid);
       if (name) localStorage.setItem('userName', name);
       if (phone) localStorage.setItem('userPhone', phone);
@@ -85,7 +114,6 @@ const SignupPage = () => {
     }
   };
 
-  const [errorMsg, setErrorMsg] = useState('');
 
   const handleGoogleSignup = async () => {
     try {
@@ -104,8 +132,17 @@ const SignupPage = () => {
       localStorage.clear();
       if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
 
-      localStorage.setItem('isUserLoggedIn', 'true');
-      localStorage.setItem('userEmail', result.user.email || '');
+      const userEmail = result.user.email || '';
+      const isAdminDoc = await checkAndBootstrapAdminStatus(result.user.uid, userEmail);
+      const isAdmin = isAdminDoc || userEmail === 'admin@reisenova.com' || userEmail === 'nuwanjskr@gmail.com';
+
+      if (isAdmin) {
+        localStorage.setItem('isAdminLoggedIn', 'true');
+      } else {
+        localStorage.setItem('isUserLoggedIn', 'true');
+      }
+
+      localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userId', result.user.uid);
       localStorage.setItem('userName', result.user.displayName || 'Traveler');
       navigate('/');

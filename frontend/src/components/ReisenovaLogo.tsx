@@ -44,13 +44,13 @@ export default function ReisenovaLogo({
               {/* Blur the dilated shape slightly */}
               <feGaussianBlur in="dilated" result="blurred" stdDeviation="1.5" />
               {/* Flood with solid white */}
-              <feFlood flood-color="white" flood-opacity="1" result="white-flood" />
+              <feFlood floodColor="white" floodOpacity="1" result="white-flood" />
               {/* Clip the flood to the blurred dilated outline */}
               <feComposite in="white-flood" in2="blurred" operator="in" result="glow" />
               
               {/* Soft atmospheric white glow */}
               <feGaussianBlur in="SourceAlpha" result="soft-blur" stdDeviation="4" />
-              <feFlood flood-color="white" flood-opacity="0.9" result="soft-white-flood" />
+              <feFlood floodColor="white" floodOpacity="0.9" result="soft-white-flood" />
               <feComposite in="soft-white-flood" in2="soft-blur" operator="in" result="soft-glow" />
 
               {/* Merge everything: soft glow, multiple layers of strong outline glow, and original graphic */}

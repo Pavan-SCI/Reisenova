@@ -11,10 +11,12 @@ import Gallery from '../components/Gallery';
 import Testimonials from '../components/Testimonials';
 import TripPlanner from '../components/TripPlanner';
 import Footer from '../components/Footer';
+import FloatingWhatsApp from '../components/FloatingWhatsApp';
 
 export default function Home() {
   return (
     <div className="relative w-full">
+      <FloatingWhatsApp />
       <Hero />
       <Beauty />
       <About />

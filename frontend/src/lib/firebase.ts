@@ -1,17 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import firebaseConfig from '../../../firebase-applet-config.json';
 
-const config = {
-  apiKey: "AIzaSyDZ87NMODp4qT7SsdswhpIdCY4-ZvLjJPM",
-  authDomain: "reisenova-d0154.firebaseapp.com",
-  projectId: "reisenova-d0154",
-  storageBucket: "reisenova-d0154.firebasestorage.app",
-};
-
-const app = initializeApp(config);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth = getAuth();
 export const googleProvider = new GoogleAuthProvider();
+export const storage = getStorage(app);

@@ -20,18 +20,26 @@ const packages = [
 
 const TourPackages = () => {
   const [fetchedPackages, setFetchedPackages] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     fetch('/api/packages').then(res => res.json()).then(data => {
       if (data && data.length > 0) {
         setFetchedPackages(data.slice(0, 2).map((d: any) => ({ id: d.id, title: d.title, desc: d.description, duration: d.duration, img: d.image || 'https://images.unsplash.com/photo-1620803457106-92c2865954ec?q=80&w=2940&auto=format&fit=crop' })));
+      } else {
+        setFetchedPackages([]);
       }
-    }).catch(console.error);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
-  const displayPackages = fetchedPackages.length > 0 ? fetchedPackages : packages;
+  const displayPackages = fetchedPackages;
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
+    if (loading || displayPackages.length === 0) return;
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray('.experience-card');
       
@@ -108,7 +116,11 @@ const TourPackages = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, displayPackages.length]);
+
+  if (!loading && displayPackages.length === 0) {
+    return null;
+  }
 
   return (
     <section id="packages" ref={containerRef} className="py-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden transition-colors duration-500">

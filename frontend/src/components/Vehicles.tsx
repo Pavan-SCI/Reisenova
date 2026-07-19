@@ -25,15 +25,6 @@ const Vehicles = () => {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch('/api/vehicles')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setVehicles(data.slice(0, 3));
-      })
-      .catch(console.error);
-  }, []);
-
   useLayoutEffect(() => {
     if (vehicles.length === 0) return;
     const ctx = gsap.context(() => {
@@ -60,6 +51,23 @@ const Vehicles = () => {
     }, containerRef);
     return () => ctx.revert();
   }, [vehicles]);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/vehicles')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setVehicles(data.slice(0, 3));
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (!loading && vehicles.length === 0) return null;
 
   return (
     <section id="vehicles" ref={containerRef} className="py-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden transition-colors duration-500">

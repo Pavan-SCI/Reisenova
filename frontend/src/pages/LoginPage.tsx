@@ -2,8 +2,9 @@ import React, { useRef, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowLeft, User, Lock, ArrowRight } from 'lucide-react';
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, googleProvider, db } from '../lib/firebase';
 import ReisenovaLogo from '../components/ReisenovaLogo';
 
 const LoginPage = () => {
@@ -28,23 +29,51 @@ const LoginPage = () => {
   }, []);
 
   const navigate = useNavigate();
+  const [errorMsg, setErrorMsg] = useState('');
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+
+  const handleResetPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const email = (formRef.current?.elements.namedItem('email') as HTMLInputElement)?.value;
+    if (!email) {
+      setErrorMsg('Please enter your email address to reset password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetEmailSent(true);
+      setErrorMsg('');
+      setTimeout(() => setResetEmailSent(false), 5000);
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Failed to send reset email');
+    }
+  };
+
+  const checkAndBootstrapAdminStatus = async (uid: string, email: string) => {
+    try {
+      const adminDocRef = doc(db, 'admins', uid);
+      let adminDoc = await getDoc(adminDocRef);
+      
+      if (!adminDoc.exists()) {
+        try {
+          // Attempt to bootstrap admin if allowed by rules
+          await setDoc(adminDocRef, { email });
+          adminDoc = await getDoc(adminDocRef);
+        } catch (e) {
+          // Will fail if not authorized, that is expected for normal users
+        }
+      }
+      return adminDoc.exists();
+    } catch (err) {
+      console.error('Error checking admin status', err);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const email = (formRef.current?.elements.namedItem('email') as HTMLInputElement)?.value;
     const password = (formRef.current?.elements.namedItem('password') as HTMLInputElement)?.value;
-
-    if (email === 'admin@reisenova.com' && password === 'admin') {
-      const isDarkMode = localStorage.getItem('darkMode');
-      localStorage.clear();
-      if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
-      
-      localStorage.setItem('isAdminLoggedIn', 'true');
-      localStorage.setItem('userEmail', 'admin@reisenova.com');
-      localStorage.setItem('userName', 'Admin User');
-      navigate('/');
-      return;
-    }
 
     if (email && password) {
       try {
@@ -52,9 +81,18 @@ const LoginPage = () => {
         const isDarkMode = localStorage.getItem('darkMode');
         localStorage.clear();
         if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
-
-        localStorage.setItem('isUserLoggedIn', 'true');
-        localStorage.setItem('userEmail', userCredential.user.email || '');
+        
+        const userEmail = userCredential.user.email || '';
+        const isAdminDoc = await checkAndBootstrapAdminStatus(userCredential.user.uid, userEmail);
+        const isAdmin = isAdminDoc || userEmail === 'admin@reisenova.com' || userEmail === 'nuwanjskr@gmail.com';
+        
+        if (isAdmin) {
+          localStorage.setItem('isAdminLoggedIn', 'true');
+        } else {
+          localStorage.setItem('isUserLoggedIn', 'true');
+        }
+        
+        localStorage.setItem('userEmail', userEmail);
         localStorage.setItem('userId', userCredential.user.uid);
         navigate('/');
       } catch (error: any) {
@@ -66,8 +104,6 @@ const LoginPage = () => {
     }
   };
 
-  const [errorMsg, setErrorMsg] = useState('');
-
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -76,8 +112,17 @@ const LoginPage = () => {
       localStorage.clear();
       if (isDarkMode) localStorage.setItem('darkMode', isDarkMode);
 
-      localStorage.setItem('isUserLoggedIn', 'true');
-      localStorage.setItem('userEmail', result.user.email || '');
+      const userEmail = result.user.email || '';
+      const isAdminDoc = await checkAndBootstrapAdminStatus(result.user.uid, userEmail);
+      const isAdmin = isAdminDoc || userEmail === 'admin@reisenova.com' || userEmail === 'nuwanjskr@gmail.com';
+
+      if (isAdmin) {
+        localStorage.setItem('isAdminLoggedIn', 'true');
+      } else {
+        localStorage.setItem('isUserLoggedIn', 'true');
+      }
+
+      localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userId', result.user.uid);
       localStorage.setItem('userName', result.user.displayName || 'Traveler');
       navigate('/');
@@ -90,6 +135,7 @@ const LoginPage = () => {
       }
     }
   };
+
 
   return (
     <section ref={containerRef} className="min-h-screen pt-16 pb-24 md:pt-20 md:pb-32 bg-transparent text-forest dark:text-[#fdfbf7] relative overflow-hidden flex flex-col justify-center">
@@ -121,6 +167,11 @@ const LoginPage = () => {
             {errorMsg && (
               <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm text-center">
                 {errorMsg}
+              </div>
+            )}
+            {resetEmailSent && (
+              <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm text-center">
+                Password reset email sent! Check your inbox.
               </div>
             )}
             
@@ -161,7 +212,7 @@ const LoginPage = () => {
                   </div>
                   <span className="text-forest/70 dark:text-[#fdfbf7]/70 group-hover:text-forest dark:group-hover:text-[#fdfbf7] font-medium transition-colors">Remember me</span>
                 </label>
-                <a href="#" className="text-forest/70 dark:text-[#fdfbf7]/70 hover:text-orange dark:hover:text-orange font-medium transition-colors">Forgot password?</a>
+                <button onClick={handleResetPassword} type="button" className="text-forest/70 dark:text-[#fdfbf7]/70 hover:text-orange dark:hover:text-orange font-medium transition-colors">Forgot password?</button>
               </div>
             </div>
 
@@ -201,3 +252,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

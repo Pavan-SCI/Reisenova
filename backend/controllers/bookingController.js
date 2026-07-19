@@ -142,6 +142,7 @@ export const bookHotel = async (req, res) => {
 export const getUserBookings = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { email } = req.query;
 
     if (!db) {
       return res.status(503).json({ error: "Database service unavailable." });
@@ -149,7 +150,35 @@ export const getUserBookings = async (req, res) => {
 
     let packagesSnapshot, hotelsSnapshot, vehiclesSnapshot;
 
-    if (userId === 'admin@reisenova.com') {
+    let isAdmin = false;
+    try {
+      // First check if the user is in admins collection
+      const adminDoc = await getDoc(doc(db, "admins", userId));
+      isAdmin = adminDoc.exists();
+      
+      // Check query email
+      if (!isAdmin && email) {
+        if (email === 'admin@reisenova.com' || email === 'nuwanjskr@gmail.com') {
+          isAdmin = true;
+        }
+      }
+
+      // If not, check if they are the hardcoded admin email in the users collection
+      if (!isAdmin) {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          const userEmail = userDoc.data().email;
+          if (userEmail === 'admin@reisenova.com' || userEmail === 'nuwanjskr@gmail.com') {
+            isAdmin = true;
+          }
+        }
+      }
+      console.log(`Checking admin status for userId: ${userId}, isAdmin: ${isAdmin}`);
+    } catch (err) {
+      console.error("Error checking admin status in bookings:", err);
+    }
+
+    if (isAdmin) {
       packagesSnapshot = await getDocs(query(collection(db, "package_bookings")));
       hotelsSnapshot = await getDocs(query(collection(db, "hotel_bookings")));
       vehiclesSnapshot = await getDocs(query(collection(db, "vehicle_bookings")));

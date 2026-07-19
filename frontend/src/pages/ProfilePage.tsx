@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
@@ -26,6 +26,16 @@ const formatPrice = (price: any) => {
 };
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isUserLoggedIn = localStorage.getItem('isUserLoggedIn') === 'true';
+    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+    if (!isUserLoggedIn && !isAdminLoggedIn) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState('profile');
   const [userName, setUserName] = useState<string>('Explorer');
@@ -216,8 +226,9 @@ const [packageBookings, setPackageBookings] = useState<any[]>([]);
   
   useEffect(() => {
     const userId = localStorage.getItem('userId') || localStorage.getItem('userEmail');
+    const userEmail = localStorage.getItem('userEmail') || '';
     if (userId) {
-      fetch(`/api/bookings/user/${userId}`)
+      fetch(`/api/bookings/user/${userId}?email=${encodeURIComponent(userEmail)}`)
         .then(res => res.json())
         .then(data => {
           setPackageBookings(data.packages || []);

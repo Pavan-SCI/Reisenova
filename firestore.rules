@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email']) && 
+             data.keys().size() == 1 &&
+             data.email is string && data.email.size() <= 256;
+    }
+
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    match /package_bookings/{document=**} {
+      allow read, write: if true;
+    }
+    
+    match /hotel_bookings/{document=**} {
+      allow read, write: if true;
+    }
+    
+    match /vehicle_bookings/{document=**} {
+      allow read, write: if true;
+    }
+
+    match /admins/{userId} {
+      allow read: if true;
+      allow get: if true;
+      // Allow bootstrap for authorized emails, otherwise only admins can create
+      allow create: if isSignedIn() && request.auth.uid == userId && (
+                       request.auth.token.email == 'nuwanjskr@gmail.com'
+                       || request.auth.token.email == 'admin@reisenova.com'
+                        || isAdmin()
+                     ) && isValidAdmin(incoming());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

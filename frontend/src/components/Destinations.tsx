@@ -12,19 +12,27 @@ const destinations = [
 
 const Destinations = () => {
   const [fetchedDestinations, setFetchedDestinations] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     fetch('/api/destinations').then(res => res.json()).then(data => {
       if (data && data.length > 0) {
         setFetchedDestinations(data.slice(0, 4).map((d: any) => ({ id: d.id, name: d.name, desc: d.description || d.location, img: d.image || 'https://images.unsplash.com/photo-1588258524451-24905d53a992?q=80&w=1000&auto=format&fit=crop' })));
+      } else {
+        setFetchedDestinations([]);
       }
-    }).catch(console.error);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
-  const displayDests = fetchedDestinations.length > 0 ? fetchedDestinations : destinations;
+  const displayDests = fetchedDestinations;
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
+    if (loading || displayDests.length === 0) return;
     const ctx = gsap.context(() => {
       // ── Card entrance stagger ──
       gsap.fromTo(
@@ -58,7 +66,7 @@ const Destinations = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [displayDests]);
+  }, [loading, displayDests.length]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
     const card = cardsRef.current[idx];
@@ -114,6 +122,8 @@ const Destinations = () => {
     });
   };
 
+
+  if (!loading && displayDests.length === 0) return null;
 
   return (
     <section id="destinations" ref={containerRef} className="py-32 bg-transparent text-forest dark:text-[#fdfbf7] transition-colors duration-500" style={{ perspective: '1400px', perspectiveOrigin: '50% 50%' }}>

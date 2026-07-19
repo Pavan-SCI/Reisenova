@@ -11,14 +11,21 @@ const hotels = [
 
 const Hotels = () => {
   const [fetchedHotels, setFetchedHotels] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     fetch('/api/hotels').then(res => res.json()).then(data => {
       if (data && data.length > 0) {
         setFetchedHotels(data.slice(0, 3).map((d: any) => ({ id: d.id, name: d.name, location: d.location, rating: Number(d.rating) || 5, img: d.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2940&auto=format&fit=crop' })));
+      } else {
+        setFetchedHotels([]);
       }
-    }).catch(console.error);
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
-  const displayHotels = fetchedHotels.length > 0 ? fetchedHotels : hotels;
+  const displayHotels = fetchedHotels;
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -63,6 +70,7 @@ const Hotels = () => {
 
 
   useLayoutEffect(() => {
+    if (loading || displayHotels.length === 0) return;
     const ctx = gsap.context(() => {
       gsap.fromTo('.hotel-card',
         { y: 150, opacity: 0, rotateX: 25, z: -200, scale: 0.9 },
@@ -98,7 +106,11 @@ const Hotels = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, displayHotels.length]);
+
+  if (!loading && displayHotels.length === 0) {
+    return null;
+  }
 
   return (
     <section ref={containerRef} className="py-32 relative overflow-hidden bg-transparent text-forest dark:text-[#fdfbf7] perspective-[1200px]">

@@ -78,7 +78,7 @@ const Hero = () => {
     <section ref={containerRef} className="relative h-screen w-full bg-transparent perspective-[2000px]">
       <div className="h-screen w-full flex items-center justify-center transform-style-3d">
         {/* Header / Nav */}
-        <header className="absolute top-0 left-0 w-full z-50 pt-6 pb-12 px-8 flex justify-between items-center reveal-ui">
+        <header className="absolute top-0 left-0 w-full z-50 pt-6 pb-12 px-4 md:px-8 flex justify-between items-center reveal-ui">
           {/* Completely transparent background to ensure the natural leaves behind remain sharp and clear */}
           <div className="absolute inset-0 transition-all duration-500 pointer-events-none -z-10 bg-transparent" />
           {/* Styled Reisenova Logo */}
@@ -128,9 +128,11 @@ const Hero = () => {
                 <span className="text-sm uppercase tracking-wider font-semibold">Log In</span>
               </Link>
             )}
-            <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/40 bg-black/20 dark:bg-black/30 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-all duration-500 shadow-lg drop-shadow-md">
-              <User size={18} />
-            </Link>
+            {isLoggedIn && (
+              <Link to="/profile" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-white/40 dark:border-[#fdfbf7]/40 bg-black/20 dark:bg-black/30 text-white dark:text-[#fdfbf7] hover:border-orange dark:hover:border-orange hover:text-orange dark:hover:text-orange transition-all duration-500 shadow-lg drop-shadow-md">
+                <User size={18} />
+              </Link>
+            )}
             <Link to="/plan-trip" className="hidden md:flex items-center gap-2 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-white hover:text-forest dark:hover:bg-[#fdfbf7] dark:hover:text-[#0a0f0d] transition-all duration-500 shadow-lg hover:shadow-orange/30 group">
               <span className="text-sm uppercase tracking-wider font-semibold group-hover:translate-x-1 transition-transform">Book Now</span>
             </Link>
@@ -172,7 +174,9 @@ const Hero = () => {
               ) : (
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors">Log In</Link>
               )}
-              <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors flex items-center gap-2"><User size={16} /> Profile</Link>
+              {isLoggedIn && (
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="hover:text-orange transition-colors flex items-center gap-2"><User size={16} /> Profile</Link>
+              )}
               <Link to="/plan-trip" onClick={() => setMobileMenuOpen(false)} className="mt-4 bg-orange text-[#fdfbf7] px-6 py-3 rounded-full hover:bg-forest dark:hover:bg-[#16201a] dark:hover:text-[#fdfbf7] transition-all text-center">
                 Book Now
               </Link>
@@ -189,11 +193,11 @@ const Hero = () => {
               </p>
             </div>
             <div className="overflow-hidden perspective-[1200px]" style={{ transform: 'translateZ(120px)' }}>
-              <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-6xl md:text-[8rem] lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
+              <h1 className="reveal-text text-forest dark:text-[#fdfbf7] text-5xl md:text-7xl lg:text-[10rem] font-serif leading-[0.9] tracking-tighter drop-shadow-lg dark:drop-shadow-2xl inline-block mt-4 transition-colors duration-500">
                 Explore <br />
                 <span className="italic font-medium text-orange tracking-normal pr-8 drop-shadow-md">Wild</span>
                 <br />
-                <span className="text-5xl md:text-7xl lg:text-8xl mt-4 block text-forest/90 dark:text-[#fdfbf7]/90 transition-colors duration-500">Sri Lanka</span>
+                <span className="text-4xl md:text-6xl lg:text-8xl mt-4 block text-forest/90 dark:text-[#fdfbf7]/90 transition-colors duration-500">Sri Lanka</span>
               </h1>
             </div>
             

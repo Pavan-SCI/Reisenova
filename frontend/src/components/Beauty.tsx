@@ -124,7 +124,7 @@ const Beauty = () => {
       {/* Huge Background Text */}
       <h2 
         ref={bgTextRef} 
-        className="absolute top-1/4 left-0 text-[15rem] md:text-[25rem] font-serif font-bold text-forest/ dark:text-[#fdfbf7]/[0.03] whitespace-nowrap pointer-events-none select-none z-0 tracking-tighter"
+        className="absolute top-1/4 left-0 text-[10rem] md:text-[15rem] lg:text-[25rem] font-serif font-bold text-forest/ dark:text-[#fdfbf7]/[0.03] whitespace-nowrap pointer-events-none select-none z-0 tracking-tighter"
       >
         CUSTOM TRIPS
       </h2>

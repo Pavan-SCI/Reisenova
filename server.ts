@@ -23,6 +23,10 @@ async function startServer() {
   app.use(express.json());
 
   // API routes
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   app.use('/api/trips', tripRoutes);
   app.use('/api/destinations', destinationRoutes);
   app.use('/api/hotels', hotelRoutes);
