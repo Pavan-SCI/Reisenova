@@ -13,6 +13,7 @@ const DynamicLeaf = ({
   className, 
   rotation, 
   imgUrl, 
+  fallbackImgUrl,
   scale, 
   x, 
   y, 
@@ -21,6 +22,7 @@ const DynamicLeaf = ({
   className?: string; 
   rotation: number; 
   imgUrl: string; 
+  fallbackImgUrl: string;
   scale: number; 
   x: number; 
   y: number; 
@@ -56,7 +58,13 @@ const DynamicLeaf = ({
         }}
         draggable={false} 
         referrerPolicy="no-referrer"
-        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        onError={(e) => { 
+          if (!e.currentTarget.src.endsWith(fallbackImgUrl)) {
+            e.currentTarget.src = fallbackImgUrl;
+          } else {
+            e.currentTarget.style.display = 'none';
+          }
+        }}
       />
     </div>
 
@@ -76,6 +84,7 @@ const SigiriyaLeaf = ({ className, rotation, config }: { className?: string; rot
     className={className}
     rotation={rotation}
     imgUrl={config?.imgUrl || "/sigiriya_uploaded.png"}
+    fallbackImgUrl="/sigiriya_uploaded.png"
     scale={config?.scale ?? 1.8}
     x={config?.x ?? 12}
     y={config?.y ?? 10}
@@ -88,6 +97,7 @@ const DaladaMaligawaLeaf = ({ className, rotation, config }: { className?: strin
     className={className}
     rotation={rotation}
     imgUrl={config?.imgUrl || "/dalada_maligawa.jpg"}
+    fallbackImgUrl="/dalada_maligawa.jpg"
     scale={config?.scale ?? 1.7}
     x={config?.x ?? 12}
     y={config?.y ?? 0}
@@ -100,6 +110,7 @@ const GalleLighthouseLeaf = ({ className, rotation, config }: { className?: stri
     className={className}
     rotation={rotation}
     imgUrl={config?.imgUrl || "/galle_lighthouse.jpg"}
+    fallbackImgUrl="/galle_lighthouse.jpg"
     scale={config?.scale ?? 1.8}
     x={config?.x ?? 5}
     y={config?.y ?? -10}
@@ -112,6 +123,7 @@ const DambullaCaveTempleLeaf = ({ className, rotation, config }: { className?: s
     className={className}
     rotation={rotation}
     imgUrl={config?.imgUrl || "/dambulla_cave_temple.jpg"}
+    fallbackImgUrl="/dambulla_cave_temple.jpg"
     scale={config?.scale ?? 1.8}
     x={config?.x ?? 5}
     y={config?.y ?? 0}
