@@ -1,3 +1,4 @@
 This is a dummy file to earn GitHub badges safely.
 More dummy text
 Level up commit 1
+Level up commit 2
