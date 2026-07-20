@@ -69,6 +69,7 @@ const Gallery = () => {
             trigger: containerRef.current,
             pin: true,
             scrub: 1,
+            invalidateOnRefresh: true,
             snap: {
               snapTo: 1 / (items.length - 1),
               duration: { min: 0.2, max: 1 },

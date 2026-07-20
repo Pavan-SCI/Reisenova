@@ -45,6 +45,12 @@ function ScrollToTop() {
     setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 1000);
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 2500);
   }, [pathname]);
 
   return null;
@@ -74,9 +80,20 @@ export default function App() {
 
     gsap.ticker.lagSmoothing(0, 0);
 
+    gsap.ticker.lagSmoothing(0, 0);
+
+    // Refresh ScrollTrigger when images load and layout changes
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+    const resizeObserver = new ResizeObserver(() => {
+      ScrollTrigger.refresh();
+    });
+    resizeObserver.observe(document.body);
+
     return () => {
       lenis.destroy();
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
+      window.removeEventListener('load', () => ScrollTrigger.refresh());
+      resizeObserver.disconnect();
     };
   }, []);
 
